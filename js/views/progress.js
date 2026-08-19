@@ -25,6 +25,8 @@ function renderProgressOverview() {
       </header>
 
       ${tracked.length === 0 ? renderEmptyProgress() : `
+        ${renderWeeklyStats()}
+
         ${renderTrackingPhase(phase)}
 
         <section class="section" aria-labelledby="tracked-exercises-title">
@@ -38,6 +40,21 @@ function renderProgressOverview() {
         </section>
       `}
     </section>
+  `;
+}
+
+function renderWeeklyStats() {
+  const stats = DATA.progress.getWeeklyStats();
+  return `
+    <article class="card weekly-stats-card" aria-label="Son 7 günün istatistikleri">
+      <h2 class="section-title">Bu hafta</h2>
+      <div class="weekly-stats-grid">
+        <div><span>Workout</span><strong>${stats.workoutCount}</strong></div>
+        <div><span>Set</span><strong>${stats.completedSetCount}</strong></div>
+        <div><span>PR</span><strong class="stat-success">${stats.newRecordCount}</strong></div>
+        <div><span>Artış Adayı</span><strong class="stat-warning">${stats.candidateCount}</strong></div>
+      </div>
+    </article>
   `;
 }
 

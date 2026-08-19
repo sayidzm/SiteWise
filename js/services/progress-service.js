@@ -72,6 +72,33 @@ export class ProgressService {
     };
   }
 
+  getWeeklyStats(now = new Date()) {
+    const reference = now instanceof Date ? now : new Date(now);
+    const cutoff = reference.getTime() - 6 * 86400000;
+
+    let workoutCount = 0;
+    let completedSetCount = 0;
+    let newRecordCount = 0;
+
+    for (const session of this.repository.listSessions()) {
+      if (session.status !== "completed" || !session.completedAt) continue;
+      const completedAt = Date.parse(session.completedAt);
+      if (!Number.isFinite(completedAt) || completedAt < cutoff) continue;
+
+      workoutCount += 1;
+      completedSetCount += session.exercises.reduce((sum, exercise) => {
+        const done = exercise.sets.filter((set) => set.type === "working" && set.completedAt).length;
+        return sum + done;
+      }, 0);
+      newRecordCount += this.prs.countNewRecords(session);
+    }
+
+    const candidateCount = this.listTrackedExercises()
+      .filter((item) => item.progression.status === "candidate").length;
+
+    return { workoutCount, completedSetCount, newRecordCount, candidateCount };
+  }
+
   getTrackingPhase(now = new Date()) {
     const completed = this.repository.listSessions()
       .filter((session) => session.status === "completed" && session.completedAt)

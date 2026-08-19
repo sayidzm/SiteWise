@@ -1171,6 +1171,45 @@ button.button:disabled {
 }
 
 /* Phase 6 — Progress / Double Progression */
+.weekly-stats-card {
+  display: grid;
+  gap: var(--space-3);
+}
+
+.weekly-stats-card .section-title {
+  font-size: var(--font-md);
+}
+
+.weekly-stats-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-4);
+}
+
+.weekly-stats-grid div {
+  display: grid;
+  gap: 2px;
+}
+
+.weekly-stats-grid span {
+  color: var(--text-muted);
+  font-size: var(--font-xs);
+  font-weight: 600;
+}
+
+.weekly-stats-grid strong {
+  font-size: var(--font-xl);
+  font-variant-numeric: tabular-nums;
+}
+
+.weekly-stats-grid .stat-success {
+  color: var(--success);
+}
+
+.weekly-stats-grid .stat-warning {
+  color: var(--warning);
+}
+
 .tracking-phase-card {
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto;
