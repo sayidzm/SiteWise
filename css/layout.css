@@ -1,0 +1,150 @@
+.app-shell {
+  min-height: 100dvh;
+  width: 100%;
+}
+
+.app-content {
+  width: min(100%, var(--content-max));
+  min-width: 0;
+  margin: 0 auto;
+  padding: calc(var(--space-5) + env(safe-area-inset-top)) var(--space-4)
+    calc(var(--bottom-nav-height) + var(--space-7) + env(safe-area-inset-bottom));
+}
+
+.page {
+  min-width: 0;
+}
+
+.page-header {
+  display: grid;
+  gap: var(--space-1);
+  margin-bottom: var(--space-5);
+}
+
+.page-title {
+  margin: 0;
+  font-size: clamp(26px, 8vw, 34px);
+  line-height: 1.08;
+  letter-spacing: -0.035em;
+}
+
+.page-subtitle {
+  margin: 0;
+  color: var(--text-muted);
+  font-size: var(--font-sm);
+}
+
+.section {
+  margin-top: var(--space-7);
+}
+
+.section-header {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-3);
+  margin-bottom: var(--space-3);
+}
+
+.section-title {
+  margin: 0;
+  font-size: var(--font-md);
+  letter-spacing: -0.01em;
+}
+
+.stack {
+  display: grid;
+  gap: var(--space-3);
+}
+
+.two-col {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-3);
+}
+
+@media (max-width: 359px) {
+  .app-content {
+    padding-left: var(--space-3);
+    padding-right: var(--space-3);
+  }
+
+  .two-col {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (min-width: 768px) {
+  .app-content {
+    padding-left: var(--space-6);
+    padding-right: var(--space-6);
+  }
+}
+
+.gym-mode .app-content {
+  padding-bottom: calc(var(--space-5) + env(safe-area-inset-bottom));
+}
+
+.active-workout-page {
+  padding-bottom: var(--space-4);
+}
+
+.active-workout-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  margin-bottom: var(--space-3);
+}
+
+.active-workout-title {
+  margin: 2px 0 0;
+  font-size: clamp(23px, 7vw, 30px);
+  line-height: 1.08;
+  letter-spacing: -0.03em;
+}
+
+.workout-progress-row {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--space-3);
+  margin-bottom: var(--space-2);
+  color: var(--text-muted);
+  font-size: var(--font-xs);
+  font-weight: 700;
+}
+
+.active-exercise {
+  margin-top: var(--space-6);
+}
+
+.active-exercise-heading {
+  display: grid;
+  gap: var(--space-3);
+}
+
+.active-exercise-heading h2 {
+  margin: 2px 0 0;
+  font-size: clamp(22px, 7vw, 28px);
+  line-height: 1.1;
+  letter-spacing: -0.03em;
+}
+
+.active-exercise-muscles {
+  margin: var(--space-1) 0 0;
+  color: var(--text-muted);
+  font-size: var(--font-sm);
+}
+
+.exercise-navigation {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-3);
+  margin-top: var(--space-5);
+}
+
+@media (max-width: 359px) {
+  .exercise-navigation {
+    grid-template-columns: 1fr;
+  }
+}
