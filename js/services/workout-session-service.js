@@ -94,7 +94,11 @@ export class WorkoutSessionService {
   skipRest(sessionId, slotId, setNumber, skippedAt = new Date().toISOString()) {
     return this.repository.updateSession(sessionId, (session) => {
       const set = findCompletedWorkingSet(session, slotId, setNumber);
-      set.restEndsAt = skippedAt;
+      const requested = Date.parse(skippedAt);
+      if (!Number.isFinite(requested)) throw new Error("skippedAt must be a valid ISO date string.");
+
+      const earliest = Date.parse(set.restStartedAt ?? set.completedAt);
+      set.restEndsAt = new Date(Math.max(earliest, requested)).toISOString();
       if (!set.restStartedAt) set.restStartedAt = set.completedAt;
       return session;
     });

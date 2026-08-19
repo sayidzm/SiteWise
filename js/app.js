@@ -144,6 +144,9 @@ function handleActionClick(event) {
       case "choose-import":
         chooseImportFile();
         break;
+      case "restore-pre-import":
+        restorePreImport();
+        break;
       case "reset-all-data":
         resetAllData();
         break;
@@ -201,18 +204,29 @@ async function handleImportFileChange(event) {
   if (!file) return;
 
   try {
-    if (file.size > 5 * 1024 * 1024) throw new Error("Yedek dosyası beklenenden büyük. En fazla 5 MB dosya seç.");
-
-    const active = DATA.sessions.getActiveSession();
-    const warning = active
-      ? "İçe aktarma mevcut verilerin tamamını ve devam eden workout'u değiştirecek. Devam etmek istiyor musun?"
-      : "İçe aktarma cihazdaki mevcut Workout Tracker verilerinin tamamını değiştirecek. Devam etmek istiyor musun?";
-    if (!window.confirm(warning)) return;
-
     const text = await file.text();
+    const inspection = DATA.portability.inspectImportText(text);
+    const summary = inspection.summary;
+
+    const lines = [
+      "Yedek doğrulandı. İçe aktarma cihazdaki mevcut Workout Tracker verilerinin tamamını değiştirecek.",
+      "",
+      `Tamamlanan workout: ${summary.completedSessions}`,
+      `Aktif workout: ${summary.inProgressSessions}`,
+      `Tamamlanan set: ${summary.completedSets}`,
+      `Yedek tarihi: ${new Date(inspection.exportedAt).toLocaleString("tr-TR")}`,
+      "",
+      "Mevcut verinin içe aktarma öncesi güvenlik kopyası cihazda tutulacak ve Ayarlar'dan geri alınabilecek.",
+      "",
+      "Devam etmek istiyor musun?",
+    ];
+
+    if (!window.confirm(lines.join("\n"))) return;
+
     DATA.portability.importText(text);
+    void wakeLock.release();
     renderRoute("settings");
-    showInlineNotice("Yedek başarıyla içe aktarıldı.");
+    showInlineNotice("Yedek başarıyla içe aktarıldı. Önceki veriler geri alma yedeğinde tutuluyor.");
   } catch (error) {
     console.error(error);
     showInlineError(error instanceof Error ? error.message : "Yedek içe aktarılamadı.");
@@ -241,6 +255,25 @@ function exportData() {
 function chooseImportFile() {
   const input = content.querySelector("[data-import-file]");
   input?.click();
+}
+
+function restorePreImport() {
+  const summary = DATA.portability.getPreImportRecoverySummary();
+  if (!summary) throw new Error("Geri alınabilecek içe aktarma öncesi yedek bulunamadı.");
+
+  const accepted = window.confirm(
+    `Son içe aktarmadan önceki verilere dönmek istiyor musun?\n\n` +
+    `Tamamlanan workout: ${summary.completedSessions}\n` +
+    `Aktif workout: ${summary.inProgressSessions}\n` +
+    `Tamamlanan set: ${summary.completedSets}\n\n` +
+    `Şu anki içe aktarılmış durum normal rolling backup'a alınacak.`,
+  );
+  if (!accepted) return;
+
+  DATA.portability.restorePreImport();
+  void wakeLock.release();
+  renderRoute("settings");
+  showInlineNotice("İçe aktarma geri alındı ve önceki yerel veriler geri yüklendi.");
 }
 
 function resetAllData() {

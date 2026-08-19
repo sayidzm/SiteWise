@@ -51,7 +51,11 @@ export class SessionRepository {
       const draft = clone(session);
       const result = updater(draft);
       updatedSession = result ?? draft;
-      updatedSession.updatedAt = new Date().toISOString();
+      updatedSession.updatedAt = latestIsoTimestamp(
+        new Date().toISOString(),
+        session.updatedAt,
+        session.startedAt,
+      );
       assertValidSession(updatedSession);
       state.sessions[sessionId] = updatedSession;
     });
@@ -95,4 +99,11 @@ function assertValidSession(session) {
 function clone(value) {
   if (typeof structuredClone === "function") return structuredClone(value);
   return JSON.parse(JSON.stringify(value));
+}
+
+function latestIsoTimestamp(...values) {
+  const timestamps = values
+    .map((value) => Date.parse(value))
+    .filter(Number.isFinite);
+  return new Date(Math.max(...timestamps)).toISOString();
 }

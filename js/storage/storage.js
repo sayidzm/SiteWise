@@ -22,7 +22,7 @@ export class LocalStateStore {
 
   load() {
     const primary = this.#readKey(STORAGE_KEYS.primary);
-    if (primary.ok) return primary.state;
+    if (primary.ok) return clone(primary.state);
 
     const backup = this.#readKey(STORAGE_KEYS.backup);
     if (backup.ok) {
@@ -45,8 +45,18 @@ export class LocalStateStore {
   }
 
   save(nextState) {
+    return this.replace(nextState, { backupCurrent: true });
+  }
+
+  /**
+   * Replaces the primary application state only after the replacement has
+   * passed full schema/integrity validation. The last readable state is copied
+   * to the normal rolling backup before the primary write.
+   */
+  replace(nextState, { backupCurrent = true } = {}) {
     const now = this.now();
-    const current = this.#readKey(STORAGE_KEYS.primary);
+    const currentPrimary = this.#readKey(STORAGE_KEYS.primary);
+    const currentBackup = this.#readKey(STORAGE_KEYS.backup);
     const normalized = clone(nextState);
 
     normalized.revision = Number.isInteger(normalized.revision) ? normalized.revision + 1 : 1;
@@ -57,21 +67,20 @@ export class LocalStateStore {
       throw new StorageError(`Refusing to save invalid state: ${validation.errors.join(" ")}`);
     }
 
+    const bestCurrent = currentPrimary.ok ? currentPrimary : currentBackup.ok ? currentBackup : null;
+
     try {
-      if (current.ok) {
-        this.#writeRaw(STORAGE_KEYS.backup, JSON.stringify(current.state));
+      if (backupCurrent && bestCurrent) {
+        this.#writeRaw(STORAGE_KEYS.backup, JSON.stringify(bestCurrent.state));
       }
       this.#writeRaw(STORAGE_KEYS.primary, JSON.stringify(normalized));
       return clone(normalized);
     } catch (error) {
-      if (isQuotaExceededError(error)) {
-        throw new StorageError(
-          "Cihazdaki yerel depolama alanı dolu. Veriyi kaydetmeden önce tarayıcı depolamasında yer aç veya mevcut yedeğini dışa aktar.",
-          error,
-          { code: "QUOTA_EXCEEDED" },
-        );
-      }
-      throw new StorageError("Workout verisi cihazda kalıcı olarak kaydedilemedi.", error);
+      // Web Storage setItem is atomic per key. The primary write is the final
+      // operation, so a failed replacement leaves the previous primary intact.
+      // If the rolling backup write succeeded first, keeping that valid copy is
+      // safer than trying to remove it during error recovery.
+      throw wrapWriteError(error);
     }
   }
 
@@ -83,10 +92,71 @@ export class LocalStateStore {
     return this.save(result ?? draft);
   }
 
+  /**
+   * Creates a dedicated one-level snapshot immediately before an import.
+   * Unlike the rolling backup, this key is not overwritten by ordinary saves,
+   * so the user can explicitly undo the latest successful import.
+   */
+  createPreImportSnapshot() {
+    const current = this.load();
+    const validation = validateState(current);
+    if (!validation.valid) {
+      throw new StorageError(`Cannot create pre-import snapshot from invalid state: ${validation.errors.join(" ")}`);
+    }
+
+    try {
+      this.#writeRaw(STORAGE_KEYS.preImport, JSON.stringify(current));
+      return clone(current);
+    } catch (error) {
+      if (isQuotaExceededError(error)) {
+        throw new StorageError(
+          "İçe aktarma öncesi güvenlik yedeği oluşturulamadı çünkü yerel depolama alanı dolu. Önce mevcut verini dışa aktar veya depolamada yer aç.",
+          error,
+          { code: "PREIMPORT_SNAPSHOT_QUOTA" },
+        );
+      }
+      throw new StorageError("İçe aktarma öncesi güvenlik yedeği oluşturulamadı.", error, { code: "PREIMPORT_SNAPSHOT_FAILED" });
+    }
+  }
+
+  hasPreImportSnapshot() {
+    return this.#readKey(STORAGE_KEYS.preImport).ok;
+  }
+
+  getPreImportSnapshot() {
+    const snapshot = this.#readKey(STORAGE_KEYS.preImport);
+    return snapshot.ok ? clone(snapshot.state) : null;
+  }
+
+  restorePreImportSnapshot() {
+    const snapshot = this.#readKey(STORAGE_KEYS.preImport);
+    if (!snapshot.ok) {
+      throw new StorageError("Geri alınabilecek geçerli bir içe aktarma öncesi yedek bulunamadı.", snapshot.error, { code: "NO_PREIMPORT_SNAPSHOT" });
+    }
+
+    const restored = this.replace(snapshot.state, { backupCurrent: true });
+    try {
+      this.backend.removeItem(STORAGE_KEYS.preImport);
+    } catch {
+      // Restored data is already safe. A stale recovery key is harmless and
+      // can be overwritten by the next import snapshot.
+    }
+    return restored;
+  }
+
+  clearPreImportSnapshot() {
+    try {
+      this.backend.removeItem(STORAGE_KEYS.preImport);
+    } catch (error) {
+      throw new StorageError("İçe aktarma geri alma yedeği silinemedi.", error);
+    }
+  }
+
   reset() {
     try {
       this.backend.removeItem(STORAGE_KEYS.primary);
       this.backend.removeItem(STORAGE_KEYS.backup);
+      this.backend.removeItem(STORAGE_KEYS.preImport);
     } catch (error) {
       throw new StorageError("Unable to reset workout data.", error);
     }
@@ -123,6 +193,17 @@ export class LocalStateStore {
   #writeRaw(key, value) {
     this.backend.setItem(key, value);
   }
+}
+
+function wrapWriteError(error) {
+  if (isQuotaExceededError(error)) {
+    return new StorageError(
+      "Cihazdaki yerel depolama alanı dolu. Veriyi kaydetmeden önce tarayıcı depolamasında yer aç veya mevcut yedeğini dışa aktar.",
+      error,
+      { code: "QUOTA_EXCEEDED" },
+    );
+  }
+  return new StorageError("Workout verisi cihazda kalıcı olarak kaydedilemedi.", error);
 }
 
 function isQuotaExceededError(error) {

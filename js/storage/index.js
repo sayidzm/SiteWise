@@ -19,7 +19,7 @@ export function createWorkoutDataLayer(options = {}) {
   const prs = new PRService(sessions);
   const progress = new ProgressService(sessions, progression, prs);
   const settings = new SettingsService(store);
-  const portability = new DataPortabilityService(store);
+  const portability = new DataPortabilityService(store, options);
 
   return Object.freeze({ store, sessions, workouts, previous, history, progression, prs, progress, settings, portability });
 }

@@ -9,6 +9,7 @@ export function renderSettings() {
   const completed = sessions.filter((session) => session.status === "completed").length;
   const inProgress = sessions.filter((session) => session.status === "in_progress").length;
   const storageBytes = new Blob([JSON.stringify(state)]).size;
+  const importRecovery = DATA.portability.getPreImportRecoverySummary();
 
   return `
     <section class="page settings-page">
@@ -94,6 +95,16 @@ export function renderSettings() {
             <b aria-hidden="true">↑</b>
           </button>
           <input class="visually-hidden" type="file" accept="application/json,.json" data-import-file tabindex="-1" aria-hidden="true" />
+
+          ${importRecovery ? `
+            <button class="settings-action-card recovery-action-card" type="button" data-action="restore-pre-import">
+              <span>
+                <strong>Son içe aktarmayı geri al</strong>
+                <small>İçe aktarmadan hemen önceki yerel duruma dön. ${importRecovery.completedSessions} tamamlanan workout içeren güvenlik yedeği hazır.</small>
+              </span>
+              <b aria-hidden="true">↶</b>
+            </button>
+          ` : ""}
         </div>
       </section>
 

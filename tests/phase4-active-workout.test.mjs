@@ -76,7 +76,7 @@ workouts.adjustRest(second.id, "upper-a-01", 1, 30);
 completedSet = repo.getActiveSession().exercises[0].sets[0];
 assert.ok(Date.parse(completedSet.restEndsAt) >= beforeExtension + 30_000);
 
-const skipAt = new Date(Date.now() + 10_000).toISOString();
+const skipAt = new Date(Date.parse(completedAt) + 10_000).toISOString();
 workouts.skipRest(second.id, "upper-a-01", 1, skipAt);
 completedSet = repo.getActiveSession().exercises[0].sets[0];
 assert.equal(completedSet.restEndsAt, skipAt);

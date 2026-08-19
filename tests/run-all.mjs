@@ -21,6 +21,7 @@ const tests = [
   "phase10-service-worker.test.mjs",
   "phase10-render-contract.test.mjs",
   "phase10-release-audit.test.mjs",
+  "phase11-backup-integrity.test.mjs",
 ];
 
 for (const test of tests) run(process.execPath, [path.join(here, test)]);
@@ -45,7 +46,7 @@ for (const cssFile of walk(path.join(root, "css")).filter((file) => file.endsWit
   if (opens !== closes) throw new Error(`Unbalanced CSS braces: ${path.relative(root, cssFile)} (${opens}/${closes})`);
 }
 
-console.log("All Phase 10 regression, syntax, import and CSS checks passed.");
+console.log("All Phase 11 regression, backup integrity, syntax, import and CSS checks passed.");
 
 function run(command, args, { quiet = false } = {}) {
   const result = spawnSync(command, args, { cwd: root, encoding: "utf8" });
