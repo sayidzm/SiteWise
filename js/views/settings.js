@@ -1,6 +1,13 @@
 import { DATA } from "../services/app-data.js";
 import { PWA } from "../services/pwa-service.js";
 
+const ICONS = {
+  back: `<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m15 18-6-6 6-6"/></svg>`,
+  download: `<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12m-4-4 4 4 4-4"/><path d="M5 19h14"/></svg>`,
+  upload: `<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 16V4m-4 4 4-4 4 4"/><path d="M5 20h14"/></svg>`,
+  rollback: `<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 8h6V2"/><path d="M5.5 6.5A8.5 8.5 0 1 1 4 15"/></svg>`,
+};
+
 export function renderSettings() {
   const settings = DATA.settings.getAll();
   const state = DATA.sessions.getState();
@@ -14,7 +21,8 @@ export function renderSettings() {
   return `
     <section class="page settings-page">
       <header class="page-header settings-header">
-        <p class="eyebrow"><a href="#program">← Program</a></p>
+        <a class="back-link" href="#program"><span aria-hidden="true">${ICONS.back}</span> Program</a>
+        <p class="eyebrow">SiteWise kontrol merkezi</p>
         <h1 class="page-title">Ayarlar & Veri</h1>
         <p class="page-subtitle">Gym Mode tercihleri, yerel yedek ve offline kullanım.</p>
       </header>
@@ -84,7 +92,7 @@ export function renderSettings() {
               <strong>Yedeği dışa aktar</strong>
               <small>Tüm workout geçmişini ve ayarları JSON dosyasına kaydet.</small>
             </span>
-            <b aria-hidden="true">↓</b>
+            <b aria-hidden="true">${ICONS.download}</b>
           </button>
 
           <button class="settings-action-card" type="button" data-action="choose-import">
@@ -92,7 +100,7 @@ export function renderSettings() {
               <strong>Yedekten içe aktar</strong>
               <small>Geçerli Workout Tracker yedeğiyle cihazdaki veriyi değiştir.</small>
             </span>
-            <b aria-hidden="true">↑</b>
+            <b aria-hidden="true">${ICONS.upload}</b>
           </button>
           <input class="visually-hidden" type="file" accept="application/json,.json" data-import-file tabindex="-1" aria-hidden="true" />
 
@@ -102,7 +110,7 @@ export function renderSettings() {
                 <strong>Son içe aktarmayı geri al</strong>
                 <small>İçe aktarmadan hemen önceki yerel duruma dön. ${importRecovery.completedSessions} tamamlanan workout içeren güvenlik yedeği hazır.</small>
               </span>
-              <b aria-hidden="true">↶</b>
+              <b aria-hidden="true">${ICONS.rollback}</b>
             </button>
           ` : ""}
         </div>

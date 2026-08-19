@@ -1,7 +1,12 @@
 import { startRouter, navigate, getRoute } from "./router.js";
 import { renderBottomNav } from "./components/bottom-nav.js";
 import { renderHome } from "./views/home.js";
-import { renderWorkout } from "./views/workout.js";
+import {
+  renderWorkout,
+  getWorkoutNotesSheet,
+  getWorkoutTechniqueSheet,
+  getWorkoutAlternativesSheet,
+} from "./views/workout.js";
 import { renderHistory } from "./views/history.js";
 import { renderProgress } from "./views/progress.js";
 import { renderProgram, getProgramExerciseSheet, getProgramGuideSheet } from "./views/program.js";
@@ -68,7 +73,7 @@ function renderRoute(route) {
   nav.hidden = gymMode;
 
   renderBottomNav(nav, rootRoute === "settings" ? "program" : rootRoute);
-  document.title = `${titleFor(rootRoute)} • Workout Tracker`;
+  document.title = `${titleFor(rootRoute)} • SiteWise`;
   content.focus({ preventScroll: true });
   window.scrollTo({ top: 0, behavior: "auto" });
 
@@ -102,6 +107,21 @@ function handleActionClick(event) {
       case "open-workout-exercise-info":
         openWorkoutSheet(getProgramExerciseSheet(actionElement.dataset.slotId));
         break;
+      case "open-workout-notes":
+        openWorkoutSheet(getWorkoutNotesSheet(requireActiveSession(), actionElement.dataset.slotId));
+        break;
+      case "open-workout-technique":
+        openWorkoutSheet(getWorkoutTechniqueSheet(actionElement.dataset.slotId));
+        break;
+      case "open-workout-alternatives":
+        openWorkoutSheet(getWorkoutAlternativesSheet(requireActiveSession(), actionElement.dataset.slotId));
+        break;
+      case "save-exercise-notes":
+        saveExerciseNotes(actionElement);
+        break;
+      case "save-exercise-variation":
+        saveExerciseVariation(actionElement);
+        break;
       case "open-workout-options":
         openWorkoutSheet(getWorkoutOptionsSheet());
         break;
@@ -116,6 +136,9 @@ function handleActionClick(event) {
         break;
       case "select-rir":
         selectRir(actionElement);
+        break;
+      case "use-previous":
+        usePrevious(actionElement);
         break;
       case "complete-set":
         completeCurrentSet(actionElement);
@@ -137,6 +160,15 @@ function handleActionClick(event) {
         break;
       case "finish-workout":
         finishWorkout();
+        break;
+      case "confirm-finish-workout":
+        finishWorkout(true);
+        break;
+      case "request-discard-workout":
+        openWorkoutSheet(getDiscardConfirmationSheet());
+        break;
+      case "confirm-discard-workout":
+        discardWorkout();
         break;
       case "export-data":
         exportData();
@@ -357,7 +389,7 @@ function startWorkout(button) {
 function adjustValue(button) {
   const card = button.closest(".active-set-card");
   const fieldName = button.dataset.field;
-  const input = card?.querySelector(`[data-field="${fieldName}"]`);
+  const input = card?.querySelector(`input[data-field="${fieldName}"]`);
   if (!card || !input) return;
 
   const delta = Number(button.dataset.delta);
@@ -394,10 +426,54 @@ function saveDraftField(card, field, rawValue) {
   DATA.workouts.saveSetDraft(session.id, slotId, setNumber, { [field]: value });
 }
 
+function usePrevious(button) {
+  const card = content.querySelector(".active-set-card");
+  if (!card) return;
+
+  const values = {
+    weight: Number(button.dataset.weight),
+    reps: Number(button.dataset.reps),
+    rir: Number(button.dataset.rir),
+  };
+  if (!Number.isFinite(values.weight) || !Number.isInteger(values.reps) || !Number.isInteger(values.rir)) {
+    throw new Error("Önceki set verisi kullanılamadı.");
+  }
+
+  const session = requireActiveSession();
+  DATA.workouts.saveSetDraft(session.id, card.dataset.slotId, Number(card.dataset.setNumber), values);
+  renderRoute(getRoute());
+}
+
+function saveExerciseNotes(button) {
+  const form = button.closest("[data-slot-id]");
+  if (!form) return;
+  const session = requireActiveSession();
+  const notes = form.querySelector("[data-exercise-notes]")?.value ?? "";
+  const painOrDiscomfort = form.querySelector("[data-exercise-pain]")?.value ?? "";
+  DATA.workouts.setExerciseNotes(session.id, form.dataset.slotId, { notes, painOrDiscomfort });
+  closeWorkoutSheet();
+  renderRoute(getRoute());
+  showInlineNotice("Egzersiz notları kaydedildi.");
+}
+
+function saveExerciseVariation(button) {
+  const list = button.closest("[data-variation-list]");
+  if (!list) return;
+  const selected = list.querySelector('input[name="exercise-variation"]:checked');
+  if (!selected) throw new Error("Bir egzersiz seç.");
+  const session = requireActiveSession();
+  DATA.workouts.setExerciseVariation(session.id, list.dataset.slotId, selected.value || null);
+  closeWorkoutSheet();
+  renderRoute(getRoute());
+  showInlineNotice("Egzersiz seçimi bu workout'a kaydedildi.");
+}
+
 function completeCurrentSet(button) {
   const card = button.closest(".active-set-card");
   if (!card) return;
 
+  clearTimeout(draftSaveTimer);
+  draftSaveTimer = null;
   const session = requireActiveSession();
   const slotId = card.dataset.slotId;
   const setNumber = Number(card.dataset.setNumber);
@@ -457,20 +533,62 @@ function skipRest() {
   renderRoute(getRoute());
 }
 
-function finishWorkout() {
-  closeWorkoutSheet();
+function finishWorkout(force = false) {
   const session = requireActiveSession();
   const incomplete = session.exercises
     .flatMap((exercise) => exercise.sets)
-    .filter((set) => !set.completedAt).length;
+    .filter((set) => set.type === "working" && !set.completedAt).length;
 
-  if (incomplete > 0 && DATA.settings.get("confirmIncompleteFinish")) {
-    const accepted = window.confirm(`${incomplete} çalışma seti tamamlanmadı. Workout'u yine de bitirmek istiyor musun?`);
-    if (!accepted) return;
+  if (!force && incomplete > 0 && DATA.settings.get("confirmIncompleteFinish")) {
+    openWorkoutSheet(getFinishConfirmationSheet(incomplete));
+    return;
   }
 
+  closeWorkoutSheet();
   const completed = DATA.workouts.complete(session.id);
   navigate(`workout/completed/${completed.id}`);
+}
+
+function discardWorkout() {
+  const session = requireActiveSession();
+  closeWorkoutSheet();
+  DATA.workouts.discard(session.id);
+  void wakeLock.release();
+  navigate("home");
+}
+
+function getFinishConfirmationSheet(incomplete) {
+  return {
+    eyebrow: "Eksik workout",
+    title: "Workout'u bitir?",
+    body: `
+      <section class="sheet-section sheet-callout warning-callout">
+        <h3>${incomplete} çalışma seti tamamlanmadı</h3>
+        <p>Tamamlanan setler gerçek haliyle Geçmiş'e kaydedilecek.</p>
+      </section>
+      <div class="confirmation-actions">
+        <button class="button" type="button" data-action="close-workout-sheet">Workout'a dön</button>
+        <button class="button button-secondary" type="button" data-action="confirm-finish-workout">Yine de bitir</button>
+      </div>
+    `,
+  };
+}
+
+function getDiscardConfirmationSheet() {
+  return {
+    eyebrow: "Geri alınamaz",
+    title: "Workout'u iptal et?",
+    body: `
+      <section class="sheet-section danger-callout">
+        <h3>Aktif workout silinecek</h3>
+        <p>Bu session'daki set girişleri Geçmiş'e eklenmez. Program tanımı etkilenmez.</p>
+      </section>
+      <div class="confirmation-actions">
+        <button class="button" type="button" data-action="close-workout-sheet">Workout'a dön</button>
+        <button class="button danger-button" type="button" data-action="confirm-discard-workout">Workout'u iptal et</button>
+      </div>
+    `,
+  };
 }
 
 function openProgramSheet(sheetData) {
@@ -606,7 +724,14 @@ function getWorkoutOptionsSheet() {
 
       <section class="sheet-section">
         <h3>Workout</h3>
-        <button class="button workout-finish-sheet-button" type="button" data-action="finish-workout">Workout'u bitir</button>
+        <div class="sheet-action-list workout-option-actions">
+          <button type="button" data-action="finish-workout">
+            <span><strong>Workout'u bitir</strong><small>Tamamlanan setleri Geçmiş'e kaydet</small></span><b aria-hidden="true">✓</b>
+          </button>
+          <button class="destructive-sheet-action" type="button" data-action="request-discard-workout">
+            <span><strong>Workout'u iptal et</strong><small>Bu aktif session'ı kaydetmeden kapat</small></span><b aria-hidden="true">×</b>
+          </button>
+        </div>
       </section>
     `,
   };
@@ -619,7 +744,7 @@ function requireActiveSession() {
 }
 
 function readNumericField(card, field) {
-  const input = card.querySelector(`[data-field="${field}"]`);
+  const input = card.querySelector(`input[data-field="${field}"]`);
   if (!input || input.value === "") return null;
   const value = Number(input.value);
   return Number.isFinite(value) ? value : null;

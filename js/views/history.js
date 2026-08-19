@@ -1,5 +1,8 @@
 import { DATA } from "../services/app-data.js";
 
+const CHEVRON_ICON = `<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 5 7 7-7 7"/></svg>`;
+const BACK_ICON = `<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m15 18-6-6 6-6"/></svg>`;
+
 export function renderHistory(route = "history") {
   const sessionId = route.startsWith("history/") ? route.slice("history/".length) : null;
   if (sessionId) return renderWorkoutDetail(sessionId);
@@ -8,20 +11,31 @@ export function renderHistory(route = "history") {
 
 function renderHistoryList() {
   const sessions = DATA.history.listCompleted();
+  const monthGroups = groupSessionsByMonth(sessions);
 
   return `
-    <section class="page">
+    <section class="page history-page">
       <header class="page-header">
-        <p class="eyebrow">History</p>
+        <p class="eyebrow">SiteWise kayıtları</p>
         <h1 class="page-title">Geçmiş</h1>
-        <p class="page-subtitle">Tamamladığın gerçek workout kayıtları.</p>
+        <p class="page-subtitle">Tamamladığın gerçek workout kayıtları, en yeniden eskiye.</p>
       </header>
 
-      ${sessions.length === 0 ? renderEmptyHistory() : `
-        <div class="history-list" aria-label="Tamamlanan workout'lar">
-          ${sessions.map(renderHistoryItem).join("")}
-        </div>
-      `}
+      ${sessions.length === 0 ? renderEmptyHistory() : monthGroups.map(renderHistoryMonth).join("")}
+    </section>
+  `;
+}
+
+function renderHistoryMonth(group) {
+  return `
+    <section class="section history-month" aria-labelledby="${escapeHtml(group.headingId)}">
+      <div class="section-header">
+        <h2 id="${escapeHtml(group.headingId)}" class="section-title">${escapeHtml(group.label)}</h2>
+        <span class="section-caption">${group.sessions.length} workout</span>
+      </div>
+      <div class="history-list" aria-label="${escapeHtml(`${group.label} workout kayıtları`)}">
+        ${group.sessions.map(renderHistoryItem).join("")}
+      </div>
     </section>
   `;
 }
@@ -36,7 +50,7 @@ function renderHistoryItem(summary) {
       <div class="history-item-main">
         <div class="history-item-topline">
           <h2>${escapeHtml(summary.workoutName)}</h2>
-          <span class="chevron">›</span>
+          <span class="chevron" aria-hidden="true">${CHEVRON_ICON}</span>
         </div>
         <p>${escapeHtml(formatHistoryTimestamp(summary.completedAt))}</p>
         <div class="history-meta">
@@ -55,7 +69,7 @@ function renderWorkoutDetail(sessionId) {
     return `
       <section class="page">
         <header class="detail-header">
-          <a class="back-link" href="#history">← Geçmiş</a>
+          <a class="back-link" href="#history"><span aria-hidden="true">${BACK_ICON}</span> Geçmiş</a>
         </header>
         <div class="empty-state">
           <h2>Workout bulunamadı</h2>
@@ -71,8 +85,8 @@ function renderWorkoutDetail(sessionId) {
   return `
     <section class="page history-detail-page">
       <header class="detail-header">
-        <a class="back-link" href="#history">← Geçmiş</a>
-        <p class="eyebrow">Workout detail</p>
+        <a class="back-link" href="#history"><span aria-hidden="true">${BACK_ICON}</span> Geçmiş</a>
+        <p class="eyebrow">Workout detayı</p>
         <h1 class="page-title">${escapeHtml(session.workoutName)}</h1>
         <p class="page-subtitle">${escapeHtml(formatFullTimestamp(session.completedAt))}</p>
       </header>
@@ -128,6 +142,12 @@ function renderExerciseDetail(exercise, index) {
 
       <div class="history-prescription">${escapeHtml(prescription)}</div>
 
+      ${exercise.selectedVariation ? `
+        <div class="history-exercise-notes">
+          <p><strong>Varyasyon:</strong> ${escapeHtml(exercise.selectedVariation)}</p>
+        </div>
+      ` : ""}
+
       ${completedSets.length > 0 ? `
         <div class="history-set-list" aria-label="${escapeHtml(exercise.exerciseName)} setleri">
           ${completedSets.map((set) => renderCompletedSet(set, p.reps.perSide)).join("")}
@@ -158,10 +178,39 @@ function renderCompletedSet(set, perSide) {
 function renderEmptyHistory() {
   return `
     <div class="empty-state">
+      <p class="eyebrow">Kayıtlar</p>
       <h2>Henüz workout yok</h2>
       <p>İlk gerçek workout tamamlandığında burada görünecek.</p>
     </div>
   `;
+}
+
+function groupSessionsByMonth(sessions) {
+  const groups = [];
+  const byKey = new Map();
+
+  for (const session of sessions) {
+    const date = new Date(session.completedAt);
+    const valid = !Number.isNaN(date.getTime());
+    const key = valid ? `${date.getFullYear()}-${date.getMonth()}` : "unknown";
+    let group = byKey.get(key);
+
+    if (!group) {
+      group = {
+        headingId: `history-month-${key}`,
+        label: valid
+          ? new Intl.DateTimeFormat("tr-TR", { month: "long", year: "numeric" }).format(date)
+          : "Tarihi bilinmeyen",
+        sessions: [],
+      };
+      byKey.set(key, group);
+      groups.push(group);
+    }
+
+    group.sessions.push(session);
+  }
+
+  return groups;
 }
 
 function formatDuration(seconds) {
@@ -189,7 +238,7 @@ function formatHistoryTimestamp(isoDate) {
   const date = new Date(isoDate);
   if (Number.isNaN(date.getTime())) return "—";
   return new Intl.DateTimeFormat("tr-TR", {
-    weekday: "short",
+    weekday: "long",
     hour: "2-digit",
     minute: "2-digit",
   }).format(date);

@@ -1,5 +1,11 @@
 import { DATA } from "../services/app-data.js";
 
+const CHEVRON_ICON = `<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 5 7 7-7 7"/></svg>`;
+const BACK_ICON = `<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m15 18-6-6 6-6"/></svg>`;
+const CHECK_ICON = `<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 12 4 4L19 6"/></svg>`;
+const FAIL_ICON = `<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M6 12h12"/></svg>`;
+const MANUAL_ICON = `<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M9.8 9a2.5 2.5 0 0 1 4.8 1c0 1.8-2.6 2-2.6 3.8M12 17.2h.01"/></svg>`;
+
 export function renderProgress(route = "progress") {
   const encodedKey = route.startsWith("progress/") ? route.slice("progress/".length) : null;
   if (encodedKey) return renderExerciseProgress(decodeURIComponent(encodedKey));
@@ -13,9 +19,9 @@ function renderProgressOverview() {
   return `
     <section class="page">
       <header class="page-header">
-        <p class="eyebrow">Progress</p>
+        <p class="eyebrow">SiteWise analizi</p>
         <h1 class="page-title">İlerleme</h1>
-        <p class="page-subtitle">Yalnızca tamamlanmış gerçek workout kayıtlarından hesaplanır.</p>
+        <p class="page-subtitle">PR ve double progression durumu yalnızca tamamlanmış gerçek workout kayıtlarından hesaplanır.</p>
       </header>
 
       ${tracked.length === 0 ? renderEmptyProgress() : `
@@ -40,7 +46,7 @@ function renderExerciseProgress(key) {
   if (!detail) {
     return `
       <section class="page">
-        <header class="detail-header"><a class="back-link" href="#progress">← İlerleme</a></header>
+        <header class="detail-header"><a class="back-link" href="#progress"><span aria-hidden="true">${BACK_ICON}</span> İlerleme</a></header>
         <div class="empty-state">
           <h2>Egzersiz verisi bulunamadı</h2>
           <p>Bu egzersiz için tamamlanmış gerçek performans kaydı yok.</p>
@@ -56,7 +62,7 @@ function renderExerciseProgress(key) {
   return `
     <section class="page progress-detail-page">
       <header class="detail-header">
-        <a class="back-link" href="#progress">← İlerleme</a>
+        <a class="back-link" href="#progress"><span aria-hidden="true">${BACK_ICON}</span> İlerleme</a>
         <p class="eyebrow">${escapeHtml(detail.workoutName)}</p>
         <h1 class="page-title">${escapeHtml(detail.exerciseName)}</h1>
         <p class="page-subtitle">${p.workingSets} × ${p.reps.min}–${p.reps.max}${p.reps.perSide ? " / bacak" : ""} • RIR ${formatRange(p.rir.min, p.rir.max)}</p>
@@ -119,7 +125,7 @@ function renderProgressExerciseItem(item) {
       <div class="progress-exercise-side">
         <span class="progress-status status-${escapeHtml(item.progression.status)}">${escapeHtml(shortStatus(item.progression.status))}</span>
         <strong>${escapeHtml(recordText)}</strong>
-        <span class="chevron">›</span>
+        <span class="chevron" aria-hidden="true">${CHEVRON_ICON}</span>
       </div>
     </a>
   `;
@@ -230,7 +236,7 @@ function renderPerformanceItem(performance, perSide) {
           <strong>${escapeHtml(formatFullDate(performance.completedAt))}</strong>
           <span>${performance.completedSetCount}/${performance.plannedSetCount} set</span>
         </div>
-        <span class="chevron">›</span>
+        <span class="chevron" aria-hidden="true">${CHEVRON_ICON}</span>
       </div>
       <div class="performance-set-list">
         ${performance.sets.map((set) => `<span>Set ${set.setNumber}: ${escapeHtml(formatSet(set, perSide))}</span>`).join("")}
@@ -241,16 +247,17 @@ function renderPerformanceItem(performance, perSide) {
 }
 
 function renderCheck(label, passed) {
-  return `<div class="progression-check"><span class="check-icon ${passed ? "is-pass" : "is-fail"}">${passed ? "✓" : "–"}</span><span>${escapeHtml(label)}</span></div>`;
+  return `<div class="progression-check"><span class="check-icon ${passed ? "is-pass" : "is-fail"}" aria-hidden="true">${passed ? CHECK_ICON : FAIL_ICON}</span><span>${escapeHtml(label)}</span></div>`;
 }
 
 function renderManualCheck(label) {
-  return `<div class="progression-check"><span class="check-icon is-manual">?</span><span>${escapeHtml(label)} <em>manuel</em></span></div>`;
+  return `<div class="progression-check"><span class="check-icon is-manual" aria-hidden="true">${MANUAL_ICON}</span><span>${escapeHtml(label)} <em>manuel</em></span></div>`;
 }
 
 function renderEmptyProgress() {
   return `
     <div class="empty-state">
+      <p class="eyebrow">Gerçek performans</p>
       <h2>Henüz veri yok</h2>
       <p>İlk workout tamamlandıktan sonra gerçek performans, PR ve double progression durumu burada oluşacak.</p>
     </div>

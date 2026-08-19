@@ -32,11 +32,11 @@ const appCache = {
 
 const cachesMock = {
   async open(name) {
-    assert.equal(name, "workout-tracker-phase10-v1");
+    assert.equal(name, "workout-tracker-sitewise-redesign-v1");
     return appCache;
   },
   async keys() {
-    return ["workout-tracker-phase9-v1", "workout-tracker-phase10-v1"];
+    return ["workout-tracker-phase10-v1", "workout-tracker-sitewise-redesign-v1"];
   },
   async delete(name) {
     deletedCaches.push(name);
@@ -86,7 +86,7 @@ assert.ok(addAllAssets.includes("./js/app.js"));
 
 await fireWaitUntil("activate");
 assert.equal(claimCalled, true);
-assert.deepEqual(deletedCaches, ["workout-tracker-phase9-v1"]);
+assert.deepEqual(deletedCaches, ["workout-tracker-phase10-v1"]);
 
 // Offline navigation must fall back to the cached app shell.
 {

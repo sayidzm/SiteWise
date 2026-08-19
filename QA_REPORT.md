@@ -94,38 +94,32 @@ Service Worker runtime mock ile doğrulandı:
 Cache adı:
 
 ```text
-workout-tracker-phase10-v1
+workout-tracker-sitewise-redesign-v1
 ```
 
-## Gerçek Chromium viewport testi — ortam kısıtı
+Redesign ile aktif `base.css`, `workout.css` ve `responsive.css` app-shell cache listesinde yer alır.
 
-Gerçek Chromium/Playwright testi ayrıca denendi ancak bu çalışma ortamı hem `localhost` hem `file://` navigasyonlarını tarayıcı seviyesinde:
+## Gerçek Chromium viewport ve offline testi
+
+Chromium/Playwright ile şu genişliklerde yatay taşma olmadığı doğrulandı:
 
 ```text
-ERR_BLOCKED_BY_ADMINISTRATOR
+360
+390
+393
+412
+430
 ```
 
-ile engelliyor.
+390×844 viewport'ta Home, History, Progress, Program, Settings ve Active Workout renderları kontrol edildi. Active Workout üzerinde hızlı numeric giriş + RIR + anında set tamamlama, timestamp tabanlı rest timer, `+30 sn`, `Geç`, workout options, incomplete finish confirmation ve discard confirmation akışları console error olmadan çalıştı.
 
-Bu nedenle gerçek-browser screenshot/overflow kontrolü **geçmiş sayılmadı**. Bu bir uygulama test sonucu değil, çalışma ortamı kısıtıdır.
+Service Worker registration/controller aktifken browser offline moda alındı ve cached app-shell reload başarılı oldu.
 
-Yerel makinede final manuel kabul için:
-
-1. `python -m http.server 8080`
-2. Chrome DevTools Device Toolbar aç.
-3. Şu viewportlarda Home, Active Workout, History, Progress, Program, Settings ekranlarını kontrol et:
-   - 360×800
-   - 390×844
-   - 393×873
-   - 412×915
-   - 430×932
-4. Active Workout sırasında numeric keyboard açarak sticky `Seti tamamla` erişimini kontrol et.
-5. DevTools Network → Offline ile uygulamayı yenileyip app-shell'in açıldığını doğrula.
-6. Keyboard ile Tab/Shift+Tab ve bottom-sheet Escape/focus-return davranışını kontrol et.
+Desktop Chromium input focus testinde sticky `Seti tamamla` CTA görünür kaldı. Gerçek mobil yazılım klavyesi, standalone PWA ve fiziksel cihaz safe-area davranışı henüz geçmiş sayılmadı; final device QA gerektirir.
 
 ## Program bütünlüğü
 
-FAZ 10 program reçetesini veya rehber içeriğini değiştirmez. `program-data.js` ve `program-content.js`, FAZ 9 paketindeki halleriyle korunmuştur.
+Redesign program reçetesini veya rehber içeriğini değiştirmez. `program-data.js` ve `program-content.js` canonical kaynak olarak korunmuştur. Active Workout technique ve alternatives sheet'leri bu gerçek içerikleri kullanır; `selectedVariation` yalnızca aktif session'a yazılır.
 
 
 ## FAZ 11 — Backup / Import / Export hardening

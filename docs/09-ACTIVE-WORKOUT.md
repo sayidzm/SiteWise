@@ -20,7 +20,7 @@ Previous → Weight → Reps → RIR → Complete Set → Rest
 
 ## Draft autosave
 
-Weight/Reps/RIR girişleri set tamamlanmadan da kaydedilebilir.
+Weight/Reps/RIR girişleri set tamamlanmadan da kaydedilebilir. Weight ve reps alanları büyük stepper kontrollerine ek olarak doğrudan klavye girişini korur. Set tamamlama başlamadan bekleyen debounce temizlenir; böylece tamamlanan set gecikmiş draft yazımıyla tekrar düzenlenmez.
 
 Draft kuralları:
 
@@ -64,6 +64,8 @@ Rest actions:
 
 Previous yalnızca gerçek completed session'lardan gelir. Aynı workout + slot identity üzerinden eşleşir. History yoksa UI `—`/`Henüz veri yok` gösterir.
 
+`Öncekini kullan` aksiyonu eşleşen gerçek setin weight/reps/RIR değerlerini mevcut drafta doldurur. Kullanıcı seti tamamlamadan önce değerleri değiştirebilir.
+
 Hard-code Previous kesinlikle yasaktır.
 
 ## Exercise navigation
@@ -82,7 +84,7 @@ Workout tamamlanırken:
 
 ## Discard
 
-Discard edilen workout History default listesinde görünmez. Verinin lifecycle bilgisi korunur.
+Discard edilen workout History default listesinde görünmez. Verinin lifecycle bilgisi korunur. Workout seçenekleri, bitirme ve iptal işlemleri accessible custom bottom sheet üzerinden çalışır. İptal tek dokunuşla gerçekleşmez; destructive confirmation gerekir.
 
 ## Gym Mode
 
@@ -97,4 +99,9 @@ Active Workout sırasında:
 
 ## Sheet bilgi sistemi
 
-Active Workout içinden teknik/alternatif/warm-up/safety rehberi bottom sheet olarak açılabilir. Rehber `program-content.js` kaynağından gelir; workout data ile birleşmez.
+Active Workout içinden not, teknik ve alternatif aksiyonları bottom sheet olarak açılır.
+
+- Teknik ve alternatif içerikleri `program-content.js` kaynağından gelir.
+- Not ve rahatsızlık alanları aktif session exercise verisine kaydedilir.
+- Alternatif seçimi `selectedVariation` olarak yalnızca aktif session'a yazılır; canonical program tanımını değiştirmez.
+- Sheet kapanınca odak açan kontrole döner.

@@ -1,6 +1,6 @@
 {
-  "name": "Workout Tracker",
-  "short_name": "Workout",
+  "name": "SiteWise Workout Tracker",
+  "short_name": "SiteWise",
   "description": "Offline-first mobile Upper / Lower workout tracker.",
   "lang": "tr",
   "start_url": "./#home",

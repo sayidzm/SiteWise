@@ -31,6 +31,11 @@ Bu agent paketi **FAZ 11 kod tabanını** esas alır.
 - Accessibility hardening
 - Storage quota/recovery hardening
 - Regression test suite
+- SiteWise mobile-first premium UI redesign
+- Active Workout numeric steppers, quick actions ve set overview
+- Session-backed exercise notes, discomfort ve selected variation
+- Accessible custom finish/discard confirmations
+- Türkçe ay bazlı History gruplama
 
 ## Faz geçmişi
 
@@ -52,9 +57,9 @@ Bu agent paketi **FAZ 11 kod tabanını** esas alır.
 ## Henüz resmi olarak kapanmamış alanlar
 
 ### FAZ 12
-PWA + Service Worker + gerçek offline validation/hardening.
+PWA + Service Worker hardening.
 
-Kod mevcut; ancak update lifecycle ve gerçek offline davranışın formal QA'sı tamamlanmalı.
+Chromium'da Service Worker registration/controller ve cached app-shell ile offline reload doğrulandı. Update lifecycle, install/update prompt davranışı ve gerçek cihaz standalone PWA testi hâlâ formal QA gerektirir.
 
 ### FAZ 13
 Gerçek cihaz/browser üzerinde:
@@ -67,7 +72,7 @@ Gerçek cihaz/browser üzerinde:
 
 viewport testleri; final edge-case ve data-integrity audit.
 
-Çalışma ortamındaki Chromium engeli nedeniyle bazı testler statik/mocked seviyede yapılmıştır. Agent gerçek browser testini çalıştırmadıysa geçmiş gibi göstermemelidir.
+Chromium/Playwright ile 360, 390, 393, 412 ve 430 px genişliklerde yatay taşma kontrolü yapıldı. Active Workout temel set kayıt/rest/options akışı ve 390 px ana ekran renderları doğrulandı. Gerçek mobil cihaz, yazılım klavyesi ve standalone PWA testi henüz tamamlanmadı.
 
 ## Şu anki storage/app version bilgileri
 
@@ -77,10 +82,10 @@ Backup formatVersion: 1
 Backup appVersion: 0.11.0
 ```
 
-Service Worker cache adı mevcut snapshot'ta hâlâ:
+Service Worker cache adı:
 
 ```text
-workout-tracker-phase10-v1
+workout-tracker-sitewise-redesign-v1
 ```
 
-Bu isim bir sonraki resmi PWA hardening/release sırasında versioning stratejisiyle ele alınmalıdır; rastgele değiştirilmemelidir.
+Redesign sırasında aktif CSS app-shell'e eklendi. Cache adı asset değişikliğini yaymak için versionlandı; LocalStorage ve backup identifier'ları değiştirilmedi.

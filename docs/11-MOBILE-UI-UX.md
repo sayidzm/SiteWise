@@ -30,6 +30,8 @@ QA viewport hedefleri:
 
 Desktop layout'u küçültme. Mobile base CSS yaz; tablet/desktop yalnız genişletme.
 
+SiteWise redesign koyu, yüksek kontrastlı ve düşük cognitive load odaklıdır. Merkezi surface, border, spacing, radius ve typography tokenları kullanılır. Görsel değişiklikler gerçek data/service katmanından ayrıdır; demo performans verisi üretmez.
+
 ## Horizontal overflow
 
 Normal kullanımda horizontal scroll yasak.
@@ -93,17 +95,19 @@ Active Workout Gym Mode'da nav gizlenebilir.
 
 ## Sticky CTA
 
-Active Workout ana action (`Complete Set`) alt bölgede kolay erişilebilir olmalıdır.
+Active Workout ana action (`Seti tamamla`) alt bölgede kolay erişilebilir olmalıdır. CTA safe-area ve VisualViewport tabanlı keyboard inset ile konumlanır.
 
 ## Bottom sheets
 
 Tercih edilen alanlar:
 
-- exercise info,
+- technique,
 - alternatives,
-- notes,
-- RIR guide,
-- warm-up/safety/workout options.
+- notes ve discomfort,
+- workout options,
+- incomplete finish confirmation,
+- destructive discard confirmation,
+- warm-up/safety bilgileri.
 
 Sheet max viewport'u aşmamalı; scrollable olmalı; close sonrası focus opener'a dönmeli.
 
@@ -134,8 +138,10 @@ Bottom nav, sticky CTA ve sheetlerde `env(safe-area-inset-bottom)` dikkate alın
 - semantic buttons,
 - keyboard focus,
 - focus return from modal/sheet,
-- aria-modal where appropriate,
+- `dialog` ve `aria-modal` semantiği,
+- `aria-current` ve `aria-pressed` durumları,
 - progressbar semantics,
+- minimum 44×44 px touch target,
 - timer her saniye live region spam yapmamalı.
 
 ## Performans

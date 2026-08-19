@@ -38,6 +38,10 @@ button {
   border: 0;
 }
 
+[hidden] {
+  display: none !important;
+}
+
 a {
   color: inherit;
 }

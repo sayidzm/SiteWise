@@ -53,10 +53,18 @@ assert.deepEqual(last.sets.map(({ weight, reps, rir }) => ({ weight, reps, rir }
 assert.equal(previous.getPreviousExercise(second, "upper-a-02"), null, "No fake previous data should be created.");
 
 workouts.saveSetDraft(second.id, "upper-a-01", 1, { weight: 27, reps: 10, rir: 3 });
+workouts.setExerciseNotes(second.id, "upper-a-01", {
+  notes: "Koltuk ayarı 4",
+  painOrDiscomfort: "",
+});
+workouts.setExerciseVariation(second.id, "upper-a-01", "Dumbbell bench press");
 let active = repo.getActiveSession();
 let draft = active.exercises[0].sets[0];
 assert.equal(draft.weight, 27);
 assert.equal(draft.completedAt, null);
+assert.equal(active.exercises[0].notes, "Koltuk ayarı 4");
+assert.equal(active.exercises[0].painOrDiscomfort, "");
+assert.equal(active.exercises[0].selectedVariation, "Dumbbell bench press");
 
 const completedAt = new Date(Date.now() + 60_000).toISOString();
 workouts.completeSet(second.id, "upper-a-01", 1, {
@@ -86,6 +94,11 @@ assert.equal(repo.getActiveSession().currentExerciseIndex, 1);
 
 const finished = workouts.complete(second.id, new Date(Date.now() + 120_000).toISOString());
 assert.equal(finished.status, "completed");
+assert.equal(repo.getActiveSession(), null);
+
+const third = workouts.start("upper-a", { idFactory, now: secondNow });
+const discarded = workouts.discard(third.id, "2026-08-20T09:00:00.000Z");
+assert.equal(discarded.status, "discarded");
 assert.equal(repo.getActiveSession(), null);
 
 console.log("FAZ 4 active-workout tests passed.");

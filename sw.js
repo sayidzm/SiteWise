@@ -1,4 +1,4 @@
-const CACHE_NAME = "workout-tracker-phase10-v1";
+const CACHE_NAME = "workout-tracker-sitewise-redesign-v1";
 const APP_SHELL = [
   "./",
   "./index.html",
@@ -7,6 +7,8 @@ const APP_SHELL = [
   "./css/base.css",
   "./css/layout.css",
   "./css/components.css",
+  "./css/workout.css",
+  "./css/responsive.css",
   "./js/app.js",
   "./js/router.js",
   "./js/components/bottom-nav.js",

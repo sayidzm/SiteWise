@@ -67,9 +67,11 @@ assert.doesNotMatch(workout, /data-rest-display role="timer" aria-live="polite"/
 assert.match(settings, /data-import-file tabindex="-1" aria-hidden="true"/);
 assert.doesNotMatch(app, /onclick=/);
 assert.match(app, /data-action="reload-app"/);
+assert.match(app, /querySelector\(`input\[data-field="\$\{fieldName\}"\]`\)/);
+assert.match(app, /querySelector\(`input\[data-field="\$\{field\}"\]`\)/);
 
 // Release hygiene.
-assert.match(sw, /workout-tracker-phase10-v1/);
+assert.match(sw, /workout-tracker-sitewise-redesign-v1/);
 for (const file of fs.readdirSync(path.join(root, "js"), { recursive: true })) {
   if (typeof file !== "string" || !file.endsWith(".js")) continue;
   const source = read(path.join("js", file));

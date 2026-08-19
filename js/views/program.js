@@ -1,6 +1,10 @@
 import { PROGRAM } from "../data/program-data.js";
 import { getExerciseDetail, getGuideList, getGuideSection } from "../data/program-content.js";
 
+const CHEVRON_ICON = `<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 5 7 7-7 7"/></svg>`;
+const BACK_ICON = `<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m15 18-6-6 6-6"/></svg>`;
+const CLOSE_ICON = `<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18"/></svg>`;
+
 export function renderProgram(route) {
   const [, workoutId] = route.split("/");
   if (workoutId && PROGRAM.workouts[workoutId]) {
@@ -10,7 +14,7 @@ export function renderProgram(route) {
   return `
     <section class="page program-page">
       <header class="page-header">
-        <p class="eyebrow">Program</p>
+        <p class="eyebrow">SiteWise programı</p>
         <h1 class="page-title">Upper / Lower</h1>
         <p class="page-subtitle">Antrenman planı, teknik rehber, ısınma, progresyon ve güvenlik tek yerde.</p>
       </header>
@@ -29,7 +33,7 @@ export function renderProgram(route) {
           <small>Ayarlar & Veri</small>
           <strong>Offline, yedek ve Gym Mode tercihleri</strong>
         </span>
-        <b aria-hidden="true">›</b>
+        <b aria-hidden="true">${CHEVRON_ICON}</b>
       </a>
 
       <section class="section" aria-labelledby="program-workouts-title">
@@ -40,10 +44,10 @@ export function renderProgram(route) {
           ${Object.values(PROGRAM.workouts).map((workout) => `
             <a class="list-item" href="#program/${workout.id}">
               <div class="list-item-main">
-                <p class="list-item-title">${workout.name}</p>
+                <p class="list-item-title">${escapeHtml(workout.name)}</p>
                 <p class="list-item-subtitle">${workout.exercises.length} egzersiz • ${workout.estimatedDuration.min}–${workout.estimatedDuration.max} dk</p>
               </div>
-              <span class="chevron" aria-hidden="true">›</span>
+              <span class="chevron" aria-hidden="true">${CHEVRON_ICON}</span>
             </a>
           `).join("")}
         </div>
@@ -58,9 +62,10 @@ function renderWorkoutDetail(workout) {
   return `
     <section class="page program-page">
       <header class="page-header">
-        <p class="eyebrow"><a href="#program">← Program</a></p>
-        <h1 class="page-title">${workout.name}</h1>
-        <p class="page-subtitle">${workout.focus}</p>
+        <a class="back-link" href="#program"><span aria-hidden="true">${BACK_ICON}</span> Program</a>
+        <p class="eyebrow">Workout planı</p>
+        <h1 class="page-title">${escapeHtml(workout.name)}</h1>
+        <p class="page-subtitle">${escapeHtml(workout.focus)}</p>
         <div class="meta-row program-workout-meta">
           <span class="meta-chip">${workout.exercises.length} egzersiz</span>
           <span class="meta-chip">${workout.estimatedDuration.min}–${workout.estimatedDuration.max} dk</span>
@@ -88,8 +93,8 @@ function renderExerciseCard(exercise, index) {
       <div class="exercise-topline">
         <div class="exercise-index">${index + 1}</div>
         <div class="program-exercise-main">
-          <h2 class="exercise-name">${exercise.name}</h2>
-          <p class="list-item-subtitle">${exercise.targetMuscles}</p>
+          <h2 class="exercise-name">${escapeHtml(exercise.name)}</h2>
+          <p class="list-item-subtitle">${escapeHtml(exercise.targetMuscles)}</p>
         </div>
       </div>
 
@@ -101,17 +106,17 @@ function renderExerciseCard(exercise, index) {
 
       <div class="program-alternative-preview">
         <span>Alternatif</span>
-        <strong>${alternativePreview}</strong>
+        <strong>${escapeHtml(alternativePreview)}</strong>
       </div>
 
       <button
         class="program-info-button"
         type="button"
         data-action="open-program-exercise-info"
-        data-slot-id="${exercise.slotId}"
+        data-slot-id="${escapeHtml(exercise.slotId)}"
       >
         Teknik & alternatifler
-        <span aria-hidden="true">›</span>
+        <span aria-hidden="true">${CHEVRON_ICON}</span>
       </button>
     </article>
   `;
@@ -123,11 +128,11 @@ function renderGuideCard(guide) {
       class="program-guide-card"
       type="button"
       data-action="open-program-guide"
-      data-guide-id="${guide.id}"
+      data-guide-id="${escapeHtml(guide.id)}"
     >
-      <span class="program-guide-eyebrow">${guide.eyebrow}</span>
-      <strong>${guide.title}</strong>
-      <span class="program-guide-chevron" aria-hidden="true">›</span>
+      <span class="program-guide-eyebrow">${escapeHtml(guide.eyebrow)}</span>
+      <strong>${escapeHtml(guide.title)}</strong>
+      <span class="program-guide-chevron" aria-hidden="true">${CHEVRON_ICON}</span>
     </button>
   `;
 }
@@ -144,7 +149,7 @@ function renderProgramSheet() {
             type="button"
             aria-label="Kapat"
             data-action="close-program-sheet"
-          >×</button>
+          >${CLOSE_ICON}</button>
         </div>
         <div class="bottom-sheet-body" data-program-sheet-body></div>
       </div>
@@ -245,4 +250,13 @@ function findExerciseBySlotId(slotId) {
 function formatRestRange(rest) {
   const f = (seconds) => seconds % 60 === 0 ? `${seconds / 60} dk` : `${seconds} sn`;
   return rest.min === rest.max ? f(rest.min) : `${f(rest.min)}–${f(rest.max)}`;
+}
+
+function escapeHtml(value) {
+  return String(value)
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#039;");
 }

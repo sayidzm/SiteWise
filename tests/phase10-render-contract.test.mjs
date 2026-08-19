@@ -49,6 +49,9 @@ assert.match(workout, /Henüz veri yok/);
 assert.match(workout, /role="progressbar"/);
 assert.match(workout, /aria-modal="true"/);
 assert.match(workout, /data-rest-announcement|id="workout-sheet"/);
+assert.match(workout, /data-action="open-workout-notes"/);
+assert.match(workout, /data-action="open-workout-technique"/);
+assert.match(workout, /data-action="open-workout-alternatives"/);
 
 const settings = views.get("settings");
 assert.match(settings, /data-import-file tabindex="-1" aria-hidden="true"/);

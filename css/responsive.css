@@ -1,0 +1,307 @@
+/* SiteWise premium mobile design layer */
+:root {
+  --control-radius: 14px;
+  --motion-fast: 140ms;
+  --motion-base: 200ms;
+}
+
+body {
+  overscroll-behavior-y: none;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+.app-content {
+  padding-top: calc(32px + env(safe-area-inset-top));
+}
+
+.page-header {
+  gap: 5px;
+  margin-bottom: 24px;
+}
+
+.page-title {
+  font-size: clamp(28px, 8vw, 32px);
+}
+
+.page-subtitle {
+  max-width: 52ch;
+  line-height: 1.45;
+}
+
+.eyebrow {
+  font-size: 12px;
+  letter-spacing: 0.08em;
+}
+
+.section {
+  margin-top: 32px;
+}
+
+.section-title {
+  font-size: 18px;
+}
+
+.card,
+.list-item,
+.history-item,
+.history-exercise-card,
+.progress-exercise-item,
+.performance-item,
+.program-guide-card,
+.settings-toggle-row,
+.settings-action-card {
+  background: var(--surface);
+}
+
+.hero-card {
+  gap: 20px;
+  padding: 20px;
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  background: var(--surface);
+  box-shadow: none;
+}
+
+.hero-title {
+  font-size: clamp(24px, 7vw, 29px);
+}
+
+.button {
+  min-height: 54px;
+  border-radius: 14px;
+  font-size: 16px;
+  font-weight: 750;
+}
+
+.button-secondary {
+  background: var(--surface-3);
+}
+
+.meta-chip {
+  border-radius: 8px;
+  background: var(--surface-2);
+}
+
+.home-header .eyebrow {
+  color: var(--text);
+  font-size: 15px;
+  letter-spacing: -0.01em;
+  text-transform: none;
+}
+
+.home-header .page-title {
+  margin-top: 2px;
+}
+
+.week-grid {
+  gap: 8px;
+}
+
+.day-chip {
+  min-height: 66px;
+  display: grid;
+  align-content: center;
+  border-radius: 12px;
+  background: transparent;
+}
+
+.day-chip.is-today {
+  border-color: var(--text-soft);
+  background: var(--surface-3);
+}
+
+.day-name {
+  font-size: 12px;
+}
+
+.day-plan {
+  white-space: normal;
+  line-height: 1.15;
+}
+
+.bottom-nav {
+  height: calc(76px + env(safe-area-inset-bottom));
+  padding-top: 7px;
+  background: rgb(23 26 32 / 0.96);
+}
+
+.nav-item {
+  gap: 5px;
+  border-radius: 10px;
+  font-size: 10px;
+}
+
+.nav-item.is-active {
+  background: transparent;
+  color: var(--text);
+}
+
+.nav-item.is-active .nav-icon {
+  background: var(--surface-3);
+}
+
+.nav-icon {
+  width: 34px;
+  height: 30px;
+  display: grid;
+  place-items: center;
+  border-radius: 9px;
+}
+
+.chevron svg,
+.back-link svg,
+.program-guide-chevron svg,
+.program-info-button svg,
+.settings-action-card svg {
+  display: block;
+}
+
+.back-link {
+  gap: 5px;
+}
+
+.history-month:first-of-type {
+  margin-top: 0;
+}
+
+.history-item {
+  grid-template-columns: 50px minmax(0, 1fr);
+  border-radius: 16px;
+}
+
+.history-date {
+  width: 50px;
+  background: var(--surface-2);
+}
+
+.history-summary-grid {
+  gap: 8px;
+}
+
+.history-stat {
+  border-radius: 12px;
+  text-align: left;
+}
+
+.history-stat strong,
+.data-summary-grid strong,
+.record-card > strong,
+.tracking-week,
+.trend-value,
+.rest-time,
+.stepper-control input {
+  font-variant-numeric: tabular-nums;
+}
+
+.history-exercise-notes {
+  padding: 12px;
+  border: 1px solid var(--border);
+  border-radius: 9px;
+  background: var(--surface-2);
+}
+
+.tracking-phase-card,
+.progression-card,
+.trend-card {
+  border-radius: 16px;
+  box-shadow: none;
+}
+
+.progress-exercise-item,
+.performance-item {
+  border-radius: 16px;
+}
+
+.progress-status {
+  border-radius: 7px;
+}
+
+.record-card {
+  border-radius: 12px;
+}
+
+.program-guide-card {
+  min-height: 104px;
+  border-radius: 16px;
+}
+
+.program-info-button {
+  border-radius: 12px;
+}
+
+.settings-section {
+  margin-top: 32px;
+}
+
+.settings-toggle-row,
+.settings-action-card {
+  border-radius: 14px;
+}
+
+.bottom-sheet-panel {
+  background: var(--surface);
+}
+
+.bottom-sheet-close {
+  background: var(--surface-3);
+}
+
+.empty-state {
+  border-style: solid;
+  background: var(--surface);
+}
+
+.completion-page {
+  text-align: center;
+}
+
+.completion-mark {
+  margin-inline: auto;
+  background: var(--success);
+  color: var(--accent-contrast);
+}
+
+.completion-stats {
+  width: 100%;
+}
+
+.completion-stats .card {
+  border-radius: 12px;
+}
+
+@media (max-width: 359px) {
+  .app-content {
+    padding-top: calc(24px + env(safe-area-inset-top));
+  }
+
+  .week-grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+
+  .history-summary-grid,
+  .data-summary-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (min-width: 768px) {
+  .bottom-nav {
+    left: 50%;
+    width: min(100%, var(--content-max));
+    transform: translateX(-50%);
+    border-inline: 1px solid var(--border);
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .card,
+  .history-item,
+  .progress-exercise-item,
+  .performance-item,
+  .program-guide-card,
+  .settings-action-card,
+  .nav-item {
+    transition: background-color var(--motion-fast) ease, border-color var(--motion-fast) ease, transform var(--motion-fast) ease;
+  }
+}

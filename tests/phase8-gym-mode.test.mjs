@@ -21,7 +21,9 @@ DATA.workouts.start("upper-a", {
 });
 
 let html = renderWorkout("workout");
-assert.match(html, /data-action="open-workout-exercise-info"/);
+assert.match(html, /data-action="open-workout-technique"/);
+assert.match(html, /data-action="open-workout-notes"/);
+assert.match(html, /data-action="open-workout-alternatives"/);
 assert.match(html, /data-action="open-workout-options"/);
 assert.match(html, /id="workout-sheet"/);
 assert.match(html, /Gym Mode/);
