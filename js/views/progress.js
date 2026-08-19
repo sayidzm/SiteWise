@@ -46,7 +46,7 @@ function renderExerciseProgress(key) {
   if (!detail) {
     return `
       <section class="page">
-        <header class="detail-header"><a class="back-link" href="#progress"><span aria-hidden="true">${BACK_ICON}</span> İlerleme</a></header>
+        <header class="detail-header"><a class="back-link is-circle" href="#progress" aria-label="İlerlemeye dön"><span aria-hidden="true">${BACK_ICON}</span> İlerleme</a></header>
         <div class="empty-state">
           <h2>Egzersiz verisi bulunamadı</h2>
           <p>Bu egzersiz için tamamlanmış gerçek performans kaydı yok.</p>
@@ -62,7 +62,7 @@ function renderExerciseProgress(key) {
   return `
     <section class="page progress-detail-page">
       <header class="detail-header">
-        <a class="back-link" href="#progress"><span aria-hidden="true">${BACK_ICON}</span> İlerleme</a>
+        <a class="back-link is-circle" href="#progress" aria-label="İlerlemeye dön"><span aria-hidden="true">${BACK_ICON}</span> İlerleme</a>
         <p class="eyebrow">${escapeHtml(detail.workoutName)}</p>
         <h1 class="page-title">${escapeHtml(detail.exerciseName)}</h1>
         <p class="page-subtitle">${p.workingSets} × ${p.reps.min}–${p.reps.max}${p.reps.perSide ? " / bacak" : ""} • RIR ${formatRange(p.rir.min, p.rir.max)}</p>

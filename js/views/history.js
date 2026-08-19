@@ -113,7 +113,7 @@ function renderWorkoutDetail(sessionId) {
   return `
     <section class="page history-detail-page">
       <header class="detail-header">
-        <a class="back-link" href="#history"><span aria-hidden="true">${BACK_ICON}</span> Geçmiş</a>
+        <a class="back-link is-circle" href="#history" aria-label="Geçmişe dön"><span aria-hidden="true">${BACK_ICON}</span> Geçmiş</a>
         <p class="eyebrow">Workout detayı</p>
         <h1 class="page-title">${escapeHtml(session.workoutName)}</h1>
         <p class="page-subtitle">${escapeHtml(formatFullTimestamp(session.completedAt))}</p>
@@ -121,7 +121,7 @@ function renderWorkoutDetail(sessionId) {
 
       <div class="history-summary-grid" aria-label="Workout özeti">
         <article class="card history-stat"><span>Süre</span><strong>${escapeHtml(formatDuration(summary.durationSeconds))}</strong></article>
-        <article class="card history-stat"><span>Set</span><strong>${summary.completedSetCount}</strong></article>
+        <article class="card history-stat"><span>Tamamlanan</span><strong>${summary.completedSetCount}/${summary.plannedSetCount}</strong></article>
         <article class="card history-stat"><span>Egzersiz</span><strong>${summary.touchedExerciseCount}</strong></article>
       </div>
 
