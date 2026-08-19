@@ -129,20 +129,20 @@
 
 .day-chip {
   min-width: 0;
-  padding: 10px 4px;
+  display: grid;
+  justify-items: center;
+  gap: 6px;
+  padding: 10px 2px 8px;
   border-radius: var(--radius-md);
-  border: 1px solid var(--border);
-  background: var(--surface);
-  text-align: center;
+  opacity: 0.45;
 }
 
 .day-chip.is-today {
-  border-color: var(--text-soft);
-  background: var(--surface-3);
+  opacity: 1;
 }
 
 .day-name,
-.day-plan {
+.day-number {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -150,14 +150,36 @@
 
 .day-name {
   color: var(--text-muted);
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 700;
 }
 
-.day-plan {
-  margin-top: 3px;
-  font-size: 11px;
+.day-number {
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: var(--surface-3);
+  color: var(--text-soft);
+  font-size: 13px;
   font-weight: 800;
+}
+
+.day-chip.is-today .day-number {
+  background: var(--text-soft);
+  color: var(--bg);
+}
+
+.day-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: transparent;
+}
+
+.day-dot.is-complete {
+  background: var(--success);
 }
 
 .empty-state {

@@ -28,6 +28,39 @@
   letter-spacing: -0.035em;
 }
 
+.home-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  margin-bottom: var(--space-5);
+}
+
+.home-title {
+  margin: 0;
+  font-size: clamp(27px, 8vw, 34px);
+  line-height: 1.05;
+  letter-spacing: -0.035em;
+}
+
+.home-subtitle {
+  margin: 3px 0 0;
+  color: var(--text-muted);
+  font-size: var(--font-sm);
+}
+
+.home-settings-link {
+  width: 48px;
+  height: 48px;
+  flex: 0 0 auto;
+  display: grid;
+  place-items: center;
+  margin-right: -6px;
+  border-radius: 50%;
+  color: var(--text-muted);
+  text-decoration: none;
+}
+
 .page-subtitle {
   margin: 0;
   color: var(--text-muted);
