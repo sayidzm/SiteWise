@@ -2,15 +2,25 @@ import { DATA } from "../services/app-data.js";
 
 const CHEVRON_ICON = `<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 5 7 7-7 7"/></svg>`;
 const BACK_ICON = `<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m15 18-6-6 6-6"/></svg>`;
+const TIMER_ICON = `<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l2.5 2.5M9 2h6"/></svg>`;
+
+const FILTERS = [
+  { key: "all", label: "Tümü", href: "#history" },
+  { key: "upper", label: "Upper", href: "#history?filter=upper" },
+  { key: "lower", label: "Lower", href: "#history?filter=lower" },
+  { key: "30g", label: "30 gün", href: "#history?filter=30g" },
+];
 
 export function renderHistory(route = "history") {
-  const sessionId = route.startsWith("history/") ? route.slice("history/".length) : null;
+  const [path, query = ""] = route.split("?");
+  const filter = new URLSearchParams(query).get("filter") ?? "all";
+  const sessionId = path.startsWith("history/") ? path.slice("history/".length) : null;
   if (sessionId) return renderWorkoutDetail(sessionId);
-  return renderHistoryList();
+  return renderHistoryList(filter);
 }
 
-function renderHistoryList() {
-  const sessions = DATA.history.listCompleted();
+function renderHistoryList(filter) {
+  const sessions = filterSessions(DATA.history.listCompleted(), filter);
   const monthGroups = groupSessionsByMonth(sessions);
 
   return `
@@ -21,9 +31,25 @@ function renderHistoryList() {
         <p class="page-subtitle">Tamamladığın gerçek workout kayıtları, en yeniden eskiye.</p>
       </header>
 
+      <nav class="filter-row" aria-label="Geçmiş filtresi">
+        ${FILTERS.map((item) => `
+          <a class="filter-pill${filter === item.key ? " is-active" : ""}" href="${item.href}"${filter === item.key ? ' aria-current="page"' : ""}>${item.label}</a>
+        `).join("")}
+      </nav>
+
       ${sessions.length === 0 ? renderEmptyHistory() : monthGroups.map(renderHistoryMonth).join("")}
     </section>
   `;
+}
+
+function filterSessions(sessions, filter) {
+  if (filter === "upper") return sessions.filter((summary) => summary.workoutId?.startsWith("upper"));
+  if (filter === "lower") return sessions.filter((summary) => summary.workoutId?.startsWith("lower"));
+  if (filter === "30g") {
+    const cutoff = Date.now() - 30 * 86400000;
+    return sessions.filter((summary) => Date.parse(summary.completedAt) >= cutoff);
+  }
+  return sessions;
 }
 
 function renderHistoryMonth(group) {
@@ -41,26 +67,28 @@ function renderHistoryMonth(group) {
 }
 
 function renderHistoryItem(summary) {
+  const prCount = getSessionPrCount(summary.id);
   return `
     <a class="history-item" href="#history/${encodeURIComponent(summary.id)}">
-      <div class="history-date" aria-hidden="true">
-        <strong>${escapeHtml(formatDay(summary.completedAt))}</strong>
-        <span>${escapeHtml(formatMonth(summary.completedAt))}</span>
+      <div class="history-item-topline">
+        <h2>${escapeHtml(summary.workoutName)}</h2>
+        ${prCount > 0 ? `<span class="pr-badge">${prCount} PR</span>` : ""}
       </div>
-      <div class="history-item-main">
-        <div class="history-item-topline">
-          <h2>${escapeHtml(summary.workoutName)}</h2>
-          <span class="chevron" aria-hidden="true">${CHEVRON_ICON}</span>
-        </div>
-        <p>${escapeHtml(formatHistoryTimestamp(summary.completedAt))}</p>
-        <div class="history-meta">
-          <span>${escapeHtml(formatDuration(summary.durationSeconds))}</span>
-          <span>${summary.completedSetCount} set</span>
-          <span>${summary.touchedExerciseCount} egzersiz</span>
-        </div>
+      <p class="history-item-date">${escapeHtml(formatHistoryDate(summary.completedAt))}</p>
+      <div class="history-meta">
+        <span>${TIMER_ICON} ${escapeHtml(formatDuration(summary.durationSeconds))}</span>
+        <span>${summary.completedSetCount} set</span>
+        <span>${summary.touchedExerciseCount} egzersiz</span>
       </div>
+      <span class="chevron" aria-hidden="true">${CHEVRON_ICON}</span>
     </a>
   `;
+}
+
+function getSessionPrCount(sessionId) {
+  const detail = DATA.history.getCompleted(sessionId);
+  if (!detail) return 0;
+  return DATA.prs.countNewRecords(detail.session);
 }
 
 function renderWorkoutDetail(sessionId) {
@@ -223,25 +251,13 @@ function formatDuration(seconds) {
   return rest === 0 ? `${hours} sa` : `${hours} sa ${rest} dk`;
 }
 
-function formatDay(isoDate) {
-  const date = new Date(isoDate);
-  return Number.isNaN(date.getTime()) ? "—" : String(date.getDate()).padStart(2, "0");
-}
-
-function formatMonth(isoDate) {
+function formatHistoryDate(isoDate) {
   const date = new Date(isoDate);
   if (Number.isNaN(date.getTime())) return "—";
-  return new Intl.DateTimeFormat("tr-TR", { month: "short" }).format(date).replace(".", "").toLocaleUpperCase("tr-TR");
-}
-
-function formatHistoryTimestamp(isoDate) {
-  const date = new Date(isoDate);
-  if (Number.isNaN(date.getTime())) return "—";
-  return new Intl.DateTimeFormat("tr-TR", {
-    weekday: "long",
-    hour: "2-digit",
-    minute: "2-digit",
-  }).format(date);
+  const month = new Intl.DateTimeFormat("tr-TR", { month: "short" }).format(date).replace(".", "");
+  const day = new Intl.DateTimeFormat("tr-TR", { day: "numeric" }).format(date);
+  const weekday = new Intl.DateTimeFormat("tr-TR", { weekday: "long" }).format(date);
+  return `${day} ${month}, ${weekday}`;
 }
 
 function formatFullTimestamp(isoDate) {
