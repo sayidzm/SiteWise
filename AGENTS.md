@@ -62,3 +62,44 @@ Working Features > Visual Mockups
 ```
 
 Bu sözleşme diğer özet belgelerle çelişirse `docs/01-SOURCE-OF-TRUTH.md` içindeki öncelik sırası uygulanır.
+
+---
+
+# AI Agent Context Pack
+
+Bu paket, Workout Tracker kod tabanını başka AI coding agentlara öğretmek/delege etmek için hazırlanmıştır.
+
+## En hızlı kullanım
+
+Yeni agenta proje kodunu ve bu klasörü birlikte ver. Ardından `prompts/MAIN-AGENT-PROMPT.md` içeriğini başlangıç promptu olarak gönder. Agent'ın ilk dosyası bu `AGENTS.md`'dir.
+
+## Paket yapısı
+
+```text
+AGENTS.md                 Universal agent sözleşmesi (tek giriş noktası)
+
+docs/                     Derin teknik/domain dokümantasyon
+memory-bank/              Cline/Cursor benzeri memory-bank formatı
+prompts/                  Copy-paste agent promptları
+sources/                  Orijinal source-of-truth ve güncel README/QA
+```
+
+Eski `CLAUDE.md`, `CODEX.md`, `GEMINI.md`, `AI_CONTEXT_README.md` ve `AI_HANDOFF_MANIFEST.md` dosyaları içerikleri buraya birleştirilerek kaldırılmıştır.
+
+## Ana giriş noktaları
+
+- `AGENTS.md` — universal agent operating manual
+- `prompts/MAIN-AGENT-PROMPT.md` — yeni agente verilecek ana prompt
+- `sources/workout-program-source.md` — workout program source of truth
+- `sources/original-product-prompt.md` — product/mobile UX source
+
+## Handoff kullanımı
+
+1. Bu proje klasörünü agente aç.
+2. `AGENTS.md` dosyasını okumasını zorunlu tut.
+3. `prompts/MAIN-AGENT-PROMPT.md` içeriğini başlangıç promptu olarak gönder.
+4. Promptun en altındaki `[BURAYA YENİ GÖREVİ YAZ]` alanını yeni işle değiştir.
+
+## Önemli
+
+Bu paket kodun yerine geçmez. Agent göreve başlamadan ilgili gerçek source ve test dosyalarını da okumalıdır.
