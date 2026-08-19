@@ -35,6 +35,8 @@ completeExercise(workouts, first.id, "upper-a-01", [
 ], "2026-08-01");
 workouts.complete(first.id, "2026-08-01T09:00:00.000Z");
 
+assert.equal(prs.countNewRecords(repo.getSession(first.id)), 0, "First session has nothing to beat, so it cannot be counted as new records.");
+
 let evaluation = progression.evaluate("upper-a", "upper-a-01");
 assert.equal(evaluation.status, "technique-phase", "First 1–2 weeks must prioritize technique, not load increases.");
 assert.equal(evaluation.candidateForLoadChange, false);
@@ -58,6 +60,11 @@ assert.equal(evaluation.candidateForLoadChange, true);
 assert.equal(evaluation.checks.allAtUpperRepLimit, true);
 assert.equal(evaluation.checks.targetRirMaintained, true);
 assert.equal(evaluation.checks.techniqueQuality, "manual-check-required", "Technique must never be fabricated as verified.");
+
+assert.equal(prs.countNewRecords(repo.getSession(second.id)), 3, "All three 25×12 sets beat the previous 25×9/10 record.");
+
+const weeklyAfterSecond = progress.getWeeklyStats(new Date("2026-08-23T12:00:00.000Z"));
+assert.deepEqual(weeklyAfterSecond, { workoutCount: 1, completedSetCount: 3, newRecordCount: 3, candidateCount: 1 }, "Weekly stats must count only sessions in the last 7 days, with real new records and real candidates.");
 
 const tracked = progress.listTrackedExercises();
 const chest = tracked.find((item) => item.key === exerciseKey("upper-a", "upper-a-01"));
@@ -87,6 +94,9 @@ assert.equal(evaluation.candidateForLoadChange, false);
 records = prs.getRecords("upper-a", "upper-a-01");
 assert.equal(records.heaviestLoad.weight, 27.5, "PR must come from real completed sets.");
 assert.equal(records.repRecord.reps, 12);
+
+const weeklyAfterFirst = progress.getWeeklyStats(new Date("2026-08-02T12:00:00.000Z"));
+assert.deepEqual(weeklyAfterFirst, { workoutCount: 1, completedSetCount: 3, newRecordCount: 0, candidateCount: 0 }, "Weekly stats must reflect only real completed sessions within the last 7 days.");
 
 const assisted = workouts.start("upper-b", { idFactory, now: () => "2026-09-05T08:00:00.000Z" });
 completeExercise(workouts, assisted.id, "upper-b-02", [

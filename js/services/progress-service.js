@@ -83,7 +83,7 @@ export class ProgressService {
     for (const session of this.repository.listSessions()) {
       if (session.status !== "completed" || !session.completedAt) continue;
       const completedAt = Date.parse(session.completedAt);
-      if (!Number.isFinite(completedAt) || completedAt < cutoff) continue;
+      if (!Number.isFinite(completedAt) || completedAt < cutoff || completedAt > reference.getTime()) continue;
 
       workoutCount += 1;
       completedSetCount += session.exercises.reduce((sum, exercise) => {
