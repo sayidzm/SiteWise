@@ -57,11 +57,18 @@ export class ProgressionService {
     }
 
     if (allAtUpperRepLimit && targetRirMaintained) {
-      const assistedMovement = isAssistanceSensitiveSlot(workoutId, slotId);
+      const assistedMovement = isLoadSensitiveSlot(workoutId, slotId);
       const message = assistedMovement
         ? "Tüm çalışma setleri üst tekrar sınırına ulaştı ve hedef RIR korundu. Bu hareket yardım/bodyweight içerebildiği için uygulama yük yönünü otomatik belirlemez; teknik aynı kalitedeyse bir sonraki küçük zorluk adımını manuel değerlendir."
         : "Tüm çalışma setleri üst tekrar sınırına ulaştı ve hedef RIR korundu. Teknik aynı kalitedeyse, eklem ağrısı yoksa ve tekrarlar savrulmadan yapıldıysa mevcut en küçük yük artışını değerlendirebilirsin.";
-      return result("candidate", "Ağırlık artışı için aday", message, true, latest, checks);
+      return result(
+        "candidate",
+        assistedMovement ? "Zorluk artışı için aday" : "Ağırlık artışı için aday",
+        message,
+        !assistedMovement,
+        latest,
+        checks,
+      );
     }
 
     if (allInsideRepRange) {
@@ -101,6 +108,8 @@ function emptyChecks() {
   };
 }
 
-function isAssistanceSensitiveSlot(workoutId, slotId) {
-  return workoutId === "upper-b" && slotId === "upper-b-02";
+export function isLoadSensitiveSlot(workoutId, slotId) {
+  if (workoutId === "upper-b" && slotId === "upper-b-02") return true;
+  if (workoutId === "lower-b" && slotId === "lower-b-07") return true;
+  return false;
 }

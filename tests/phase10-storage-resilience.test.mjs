@@ -5,6 +5,7 @@ import { STORAGE_KEYS, createEmptyState } from "../js/storage/schema.js";
 class ControlledStorage {
   #data = new Map();
   failPrimaryWrites = false;
+  failBackupWrites = false;
   failAllWrites = false;
 
   getItem(key) {
@@ -12,7 +13,9 @@ class ControlledStorage {
   }
 
   setItem(key, value) {
-    if (this.failAllWrites || (this.failPrimaryWrites && key === STORAGE_KEYS.primary)) {
+    if (this.failAllWrites
+        || (this.failPrimaryWrites && key === STORAGE_KEYS.primary)
+        || (this.failBackupWrites && key === STORAGE_KEYS.backup)) {
       const error = new Error("quota exceeded");
       error.name = "QuotaExceededError";
       error.code = 22;
@@ -84,6 +87,29 @@ const NOW = "2026-08-20T00:00:00.000Z";
   assert.equal(primary.revision, 3);
   assert.deepEqual(backup, oldState);
   assert.equal(store.load().revision, 3);
+}
+
+// A failing backup write must not lock the save: the primary write still lands
+// and the previous backup stays as a valid recovery point.
+{
+  const backend = new ControlledStorage();
+  const oldState = createEmptyState(NOW);
+  oldState.revision = 3;
+  oldState.settings = { keepScreenAwake: true };
+  backend.seed(STORAGE_KEYS.primary, JSON.stringify(oldState));
+  backend.failBackupWrites = true;
+
+  const store = new LocalStateStore({ backend, now: () => "2026-08-20T00:05:00.000Z" });
+  const nextState = structuredClone(oldState);
+  nextState.settings.restTimerVibration = true;
+
+  const saved = store.save(nextState);
+  assert.equal(saved.revision, 4);
+
+  const primary = JSON.parse(backend.getItem(STORAGE_KEYS.primary));
+  assert.equal(primary.revision, 4);
+  assert.equal(primary.settings.restTimerVibration, true);
+  assert.equal(backend.getItem(STORAGE_KEYS.backup), null, "Backup stays unset instead of aborting every later save near quota.");
 }
 
 console.log("FAZ 10 storage resilience tests passed.");

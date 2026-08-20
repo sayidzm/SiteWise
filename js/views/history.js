@@ -92,7 +92,7 @@ function getSessionPrCount(sessionId) {
 }
 
 function renderWorkoutDetail(sessionId) {
-  const result = DATA.history.getCompleted(decodeURIComponent(sessionId));
+  const result = DATA.history.getCompleted(safeDecodeURIComponent(sessionId));
   if (!result) {
     return `
       <section class="page">
@@ -288,4 +288,8 @@ function escapeHtml(value) {
     .replaceAll(">", "&gt;")
     .replaceAll('"', "&quot;")
     .replaceAll("'", "&#039;");
+}
+
+function safeDecodeURIComponent(value) {
+  try { return decodeURIComponent(value); } catch { return value; }
 }

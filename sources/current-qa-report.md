@@ -94,7 +94,7 @@ Service Worker runtime mock ile doğrulandı:
 Cache adı:
 
 ```text
-workout-tracker-phase10-v1
+workout-tracker-sitewise-redesign-v5
 ```
 
 ## Gerçek Chromium viewport testi — ortam kısıtı

@@ -5,6 +5,10 @@ export function getRoute() {
   return raw || DEFAULT_ROUTE;
 }
 
+export function getRootRoute(route) {
+  return route.split("?")[0].split("/")[0];
+}
+
 export function navigate(route) {
   const next = `#${route}`;
   if (window.location.hash === next) {

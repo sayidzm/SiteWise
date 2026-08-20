@@ -8,7 +8,7 @@ const MANUAL_ICON = `<svg viewBox="0 0 24 24" width="14" height="14" fill="none"
 
 export function renderProgress(route = "progress") {
   const encodedKey = route.startsWith("progress/") ? route.slice("progress/".length) : null;
-  if (encodedKey) return renderExerciseProgress(decodeURIComponent(encodedKey));
+  if (encodedKey) return renderExerciseProgress(safeDecodeURIComponent(encodedKey));
   return renderProgressOverview();
 }
 
@@ -336,4 +336,8 @@ function escapeHtml(value) {
     .replaceAll(">", "&gt;")
     .replaceAll('"', "&quot;")
     .replaceAll("'", "&#039;");
+}
+
+function safeDecodeURIComponent(value) {
+  try { return decodeURIComponent(value); } catch { return value; }
 }

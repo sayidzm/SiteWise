@@ -3,7 +3,7 @@ import { PROGRAM } from "../js/data/program-data.js";
 import { LocalStateStore } from "../js/storage/storage.js";
 import { SessionRepository } from "../js/services/session-repository.js";
 import { WorkoutSessionService } from "../js/services/workout-session-service.js";
-import { ProgressionService } from "../js/services/progression-service.js";
+import { ProgressionService, isLoadSensitiveSlot } from "../js/services/progression-service.js";
 import { PRService } from "../js/services/pr-service.js";
 import { ProgressService, exerciseKey } from "../js/services/progress-service.js";
 
@@ -110,6 +110,31 @@ assert.equal(assistedRecords.loadRecordSupported, false, "Assisted/bodyweight sl
 assert.equal(assistedRecords.heaviestLoad, null);
 assert.equal(assistedRecords.repRecord.reps, 8);
 
+assert.equal(isLoadSensitiveSlot("upper-b", "upper-b-02"), true);
+assert.equal(isLoadSensitiveSlot("lower-b", "lower-b-07"), true);
+assert.equal(isLoadSensitiveSlot("lower-a", "lower-a-01"), false, "Load-insensitive rule must be limited to the known assistance/bodyweight slots.");
+
+const coreFirst = workouts.start("lower-b", { idFactory, now: () => "2026-09-10T08:00:00.000Z" });
+completeExercise(workouts, coreFirst.id, "lower-b-07", [
+  [0, 15, 2],
+  [0, 15, 2],
+], "2026-09-10");
+workouts.complete(coreFirst.id, "2026-09-10T09:00:00.000Z");
+
+const coreSecond = workouts.start("lower-b", { idFactory, now: () => "2026-09-25T08:00:00.000Z" });
+completeExercise(workouts, coreSecond.id, "lower-b-07", [
+  [0, 15, 2],
+  [0, 15, 2],
+], "2026-09-25");
+workouts.complete(coreSecond.id, "2026-09-25T09:00:00.000Z");
+
+const coreEvaluation = progression.evaluate("lower-b", "lower-b-07");
+assert.equal(coreEvaluation.status, "candidate", "Upper-rep-limit bodyweight movement hits the candidate branch.");
+assert.equal(coreEvaluation.candidateForLoadChange, false, "Bodyweight core slot must not recommend a load increase.");
+const coreRecords = prs.getRecords("lower-b", "lower-b-07");
+assert.equal(coreRecords.loadRecordSupported, false, "Progression and PR must agree that this slot is load-insensitive.");
+assert.equal(coreRecords.heaviestLoad, null);
+
 const painful = workouts.start("lower-a", { idFactory, now: () => "2026-09-06T08:00:00.000Z" });
 completeExercise(workouts, painful.id, "lower-a-01", [
   [60, 12, 2],
@@ -124,6 +149,15 @@ assert.equal(progress.getTrackingPhase(new Date("2026-08-08T08:00:00.000Z")).id,
 assert.equal(progress.getTrackingPhase(new Date("2026-08-29T08:00:00.000Z")).id, "double-progression");
 assert.equal(progress.getTrackingPhase(new Date("2026-09-19T08:00:00.000Z")).id, "checkpoint");
 assert.equal(progress.getTrackingPhase(new Date("2026-10-03T08:00:00.000Z")).id, "small-adjustments");
+
+assert.deepEqual(
+  progress.getWeeklyStats(new Date("not-a-date")),
+  { workoutCount: 0, completedSetCount: 0, newRecordCount: 0, candidateCount: 0 },
+  "An invalid reference date must yield an empty weekly window, not all-time totals.",
+);
+const invalidPhase = progress.getTrackingPhase(new Date("not-a-date"));
+assert.ok(Number.isInteger(invalidPhase.week), "An invalid reference date must not produce a NaN tracking week.");
+assert.ok(Number.isInteger(progress.getTrackingPhase("garbage").week), "Unparseable string references must not produce a NaN tracking week.");
 
 console.log("FAZ 6 progress/progression/PR tests passed.");
 

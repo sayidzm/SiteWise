@@ -1264,7 +1264,7 @@ http://[::1]
 ## Cache adı
 
 ```text
-workout-tracker-phase10-v1
+workout-tracker-sitewise-redesign-v5
 ```
 
 ## App shell cache
@@ -2760,7 +2760,7 @@ Browser DevTools → Application → Service Workers / Cache Storage üzerinden 
 FAZ 10 cache adı:
 
 ```text
-workout-tracker-phase10-v1
+workout-tracker-sitewise-redesign-v5
 ```
 
 ## Workout verisi kayboldu sanıyorum

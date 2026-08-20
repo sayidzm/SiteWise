@@ -22,6 +22,7 @@ const tests = [
   "phase10-render-contract.test.mjs",
   "phase10-release-audit.test.mjs",
   "phase11-backup-integrity.test.mjs",
+  "phase11-router-dispatch.test.mjs",
 ];
 
 for (const test of tests) run(process.execPath, [path.join(here, test)]);

@@ -1,4 +1,4 @@
-import { startRouter, navigate, getRoute } from "./router.js";
+import { startRouter, navigate, getRoute, getRootRoute } from "./router.js";
 import { renderBottomNav } from "./components/bottom-nav.js";
 import { renderHome } from "./views/home.js";
 import {
@@ -55,7 +55,7 @@ function renderRoute(route) {
   stopRestTimer();
   document.body.classList.remove("sheet-open");
 
-  const rootRoute = route.split("/")[0];
+  const rootRoute = getRootRoute(route);
   const renderer = routes[rootRoute] ?? routes.home;
 
   try {
@@ -65,7 +65,8 @@ function renderRoute(route) {
     content.innerHTML = renderFatalState(error);
   }
 
-  const gymMode = rootRoute === "workout" && Boolean(DATA.sessions.getActiveSession()) && !route.startsWith("workout/completed/");
+  const completedWithId = route.startsWith("workout/completed/") && route.length > "workout/completed/".length;
+  const gymMode = rootRoute === "workout" && Boolean(DATA.sessions.getActiveSession()) && !completedWithId;
   document.body.classList.toggle("gym-mode", gymMode);
   if (!gymMode) {
     document.body.classList.remove("keyboard-focus", "keyboard-open");
@@ -215,6 +216,11 @@ function handleWorkoutInput(event) {
   }, 180);
 }
 
+function clearDraftSaveTimer() {
+  clearTimeout(draftSaveTimer);
+  draftSaveTimer = null;
+}
+
 function handleSettingsChange(event) {
   const input = event.target.closest("[data-setting-key]");
   if (!input) return;
@@ -338,7 +344,7 @@ async function installPwa() {
 }
 
 function refreshSettingsIfOpen() {
-  if (getRoute().split("/")[0] === "settings") renderRoute(getRoute());
+  if (getRootRoute(getRoute()) === "settings") renderRoute(getRoute());
 }
 
 function handleWorkoutFocus(event) {
@@ -472,8 +478,7 @@ function completeCurrentSet(button) {
   const card = button.closest(".active-set-card");
   if (!card) return;
 
-  clearTimeout(draftSaveTimer);
-  draftSaveTimer = null;
+  clearDraftSaveTimer();
   const session = requireActiveSession();
   const slotId = card.dataset.slotId;
   const setNumber = Number(card.dataset.setNumber);
@@ -545,6 +550,7 @@ function finishWorkout(force = false) {
   }
 
   closeWorkoutSheet();
+  clearDraftSaveTimer();
   const completed = DATA.workouts.complete(session.id);
   navigate(`workout/completed/${completed.id}`);
 }
@@ -552,6 +558,7 @@ function finishWorkout(force = false) {
 function discardWorkout() {
   const session = requireActiveSession();
   closeWorkoutSheet();
+  clearDraftSaveTimer();
   DATA.workouts.discard(session.id);
   void wakeLock.release();
   navigate("home");

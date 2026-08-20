@@ -1,4 +1,4 @@
-import { getExerciseHistory } from "./progression-service.js";
+import { getExerciseHistory, isLoadSensitiveSlot } from "./progression-service.js";
 
 export class PRService {
   constructor(repository) {
@@ -89,7 +89,5 @@ function toRecord(set, value) {
 }
 
 function supportsLoadRecord(workoutId, slotId) {
-  if (workoutId === "upper-b" && slotId === "upper-b-02") return false;
-  if (workoutId === "lower-b" && slotId === "lower-b-07") return false;
-  return true;
+  return !isLoadSensitiveSlot(workoutId, slotId);
 }

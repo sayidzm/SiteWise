@@ -96,9 +96,21 @@ const finished = workouts.complete(second.id, new Date(Date.now() + 120_000).toI
 assert.equal(finished.status, "completed");
 assert.equal(repo.getActiveSession(), null);
 
+assert.throws(
+  () => workouts.saveSetDraft(second.id, "upper-a-01", 1, { weight: 30 }),
+  /Only in-progress sessions can be edited/,
+  "A stale draft write after completion must be rejected, not written into the finished session."
+);
+
 const third = workouts.start("upper-a", { idFactory, now: secondNow });
 const discarded = workouts.discard(third.id, "2026-08-20T09:00:00.000Z");
 assert.equal(discarded.status, "discarded");
 assert.equal(repo.getActiveSession(), null);
+
+assert.throws(
+  () => workouts.saveSetDraft(third.id, "upper-a-01", 1, { weight: 30 }),
+  /Only in-progress sessions can be edited/,
+  "A stale draft write after discard must be rejected."
+);
 
 console.log("FAZ 4 active-workout tests passed.");

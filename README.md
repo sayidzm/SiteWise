@@ -1264,7 +1264,7 @@ http://[::1]
 ## Cache adı
 
 ```text
-workout-tracker-phase10-v1
+workout-tracker-sitewise-redesign-v5
 ```
 
 ## App shell cache

@@ -74,6 +74,9 @@ export class ProgressService {
 
   getWeeklyStats(now = new Date()) {
     const reference = now instanceof Date ? now : new Date(now);
+    if (Number.isNaN(reference.getTime())) {
+      return { workoutCount: 0, completedSetCount: 0, newRecordCount: 0, candidateCount: 0 };
+    }
     const cutoff = reference.getTime() - 6 * 86400000;
 
     let workoutCount = 0;
@@ -109,7 +112,8 @@ export class ProgressService {
     }
 
     const start = Date.parse(completed[0].completedAt);
-    const end = now instanceof Date ? now.getTime() : Date.parse(now);
+    let end = now instanceof Date ? now.getTime() : Date.parse(now);
+    if (!Number.isFinite(end)) end = Date.now();
     const elapsedDays = Math.max(0, Math.floor((end - start) / 86400000));
     const week = Math.floor(elapsedDays / 7) + 1;
 

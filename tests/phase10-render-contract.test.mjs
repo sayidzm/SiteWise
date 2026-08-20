@@ -56,4 +56,9 @@ assert.match(workout, /data-action="open-workout-alternatives"/);
 const settings = views.get("settings");
 assert.match(settings, /data-import-file tabindex="-1" aria-hidden="true"/);
 
+const malformedHistory = renderHistory("history/%zz");
+assert.match(malformedHistory, /Workout bulunamadı/, "Malformed percent-encoding must degrade to the not-found state, not throw.");
+const malformedProgress = renderProgress("progress/%zz");
+assert.match(malformedProgress, /Egzersiz verisi bulunamadı/, "Malformed percent-encoding must degrade to a graceful empty state.");
+
 console.log("FAZ 10 rendered-view contract tests passed.");

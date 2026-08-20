@@ -71,7 +71,16 @@ export class LocalStateStore {
 
     try {
       if (backupCurrent && bestCurrent) {
-        this.#writeRaw(STORAGE_KEYS.backup, JSON.stringify(bestCurrent.state));
+        try {
+          this.#writeRaw(STORAGE_KEYS.backup, JSON.stringify(bestCurrent.state));
+        } catch (backupError) {
+          // The rolling backup is a best-effort recovery copy. Near the storage
+          // quota its write (a full copy) can fail while the primary write still
+          // fits; aborting the save then would lock every later write behind a
+          // ~2x-space requirement. Keep the previous backup as a one-version-
+          // stale recovery point and let the primary write proceed. A failing
+          // primary write below still aborts the save as before.
+        }
       }
       this.#writeRaw(STORAGE_KEYS.primary, JSON.stringify(normalized));
       return clone(normalized);

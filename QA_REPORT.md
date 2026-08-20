@@ -94,7 +94,7 @@ Service Worker runtime mock ile doğrulandı:
 Cache adı:
 
 ```text
-workout-tracker-sitewise-redesign-v1
+workout-tracker-sitewise-redesign-v5
 ```
 
 Redesign ile aktif `base.css`, `workout.css` ve `responsive.css` app-shell cache listesinde yer alır.
